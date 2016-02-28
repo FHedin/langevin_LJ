@@ -9,6 +9,11 @@ C program for Langevin MD simulations applied to Lennard Jones clusters only.
 ----------------------------------------------
 A C compiler compatible with the C99 standard or newer is required.
 
+You will need to Download or Compile the OpenMM library, a required dependancy : 
+
+see https://simtk.org/home/openmm
+and https://github.com/pandegroup/openmm
+
 Be sure to have CMAKE installed (http://www.cmake.org/), available on most repositories.
 
 Tested compilers:
@@ -37,15 +42,6 @@ For specifying another compiler on linux (for example clang or Intel icc):
   * CC=clang cmake ..
   * CC=icc cmake ..
     
-It is possible for the user to define custom energy functions using the Lua scripting language (http://www.lua.org/).
-See input_file.inp and the ./plugins directory for more details.
-
-For enabling Lua plugins files use when compiling: 
-  * cmake -DUSE_LUA=1 ..
-
-You will most probably have to edit the CMakeLists.txt file for adding paths to the Lua include and library directories.
-For best performances you can use the LuaJIT implementation : http://luajit.org/
-
 ----------------------------------------------
 ## DOCUMENTATION
 ----------------------------------------------
