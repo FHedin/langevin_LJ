@@ -64,16 +64,6 @@
 /// if stdout has been redirected to a file from command line call ( -o option)
 extern uint32_t is_stdout_redirected;
 
-/// if we decide to use CHARMM units instead of reduced units (not recommended!)
-/// 0 = reduced units
-/// 1 = CHARMM units
-// extern uint32_t charmm_units;
-
-#ifdef _OPENMP
-extern uint32_t ncpus;
-extern uint32_t nthreads;
-#endif
-
 /**
  * @brief This structure holds useful variables used across the simulations,
  * it is almost always transmitted from one function to another one .
@@ -84,21 +74,12 @@ typedef struct
     char method[32];    ///< MC Method string : 'METROP' or 'SPAV' (case insensitive)
     uint64_t nsteps ;   ///< Number of steps as a 64 bits integer to allow really long simulations (i.e. more than 2 billions)
 
-    double d_max ;          ///< Maximum possible distance in Angstroems for a MC move
-    uint32_t d_max_when;    ///< when to update d_max (a number of steps)
-    double d_max_tgt;       ///< d_max will be tuned in order to reach d_max_tgt percents of moves acceptance
-
     double inid ;       ///< An initial distance term used when randomly assigning coordinates to atoms when generating a cluster
     
     double T ;          ///< Temperature : in Kelvin
     uint8_t integrator; ///< The type on integrator used : Langevin (0) or Brownian (1)
     double friction ;   ///< Friction for Langevin/Brownian integrator : in ps^-1
     double timestep;    ///< Timestep for Langevin/Brownian integrator : in ps
-    
-    double E_constr;    ///< An energy constraints for avoiding "cluster evaporation" : avoids that atoms go to far from each other : see ener.c for details
-    double E_steepD;    ///< A threshold at which starting Steepest Descent minimisation
-    double E_expected;  ///< Expected best energy minima of the cluster currently studied ; usually taken from http://www-wales.ch.cam.ac.uk/CCD.html
-    double beta;        ///< the inverse temperature used in acceptance criterion
 
 #ifndef STDRAND
     dsfmt_t dsfmt;      ///< A structure used by the dSFMT random numbers generator
@@ -109,15 +90,17 @@ typedef struct
 } DATA;
 
 /**
- * @brief A structure holding the Lennard-Jones parameters
+ * @brief A structure holding the mass charge and Lennard-Jones parameters for a given atom type
  * See http://www.sklogwiki.org/SklogWiki/index.php/Lennard-Jones_model
  */
 typedef struct
 {
     char sym[4];    ///< atomic symbol
+    double mass;    ///< atomic mass
+    double charge;  ///< atomic charge ; unused
     double sig ;    ///< L-J sigma parameter
     double eps ;    ///< L-J epsilon parameter
-} LJPARAMS;
+} PARAMS;
 
 /**
  * @brief A structure representing an atom
@@ -128,9 +111,7 @@ typedef struct
     double y;   ///< Y coordinate
     double z;   ///< Z coordinate
     char sym[4] ;   ///< atomic symbol
-    double mass;    ///< atomic mass
-    double charge;  ///< atomic charge ; unused
-    LJPARAMS ljp;   ///< substructure containing LJ parameters
+    PARAMS pars;   ///< substructure containing FF parameters
 } ATOM;
 
 /**

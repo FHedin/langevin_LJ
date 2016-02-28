@@ -24,9 +24,6 @@ void build_cluster(ATOM at[], DATA *dat, uint32_t from, uint32_t to, int32_t mod
 ///check if some atoms are too close from each other
 int32_t  no_conflict(ATOM at[],uint32_t i);
 
-///adjust the dmax value used for mc simulations
-void adj_dmax(DATA *dat, uint64_t *step, uint64_t *acc);
-
 ///get centre of mass of the system
 CM getCM(ATOM at[],DATA *dat);
 ///recentre the system to origin

@@ -3,69 +3,45 @@
 # This file is case insensitive. You can separate the couples "keyword value"
 # by using blank spaces or tabulations.
 
-# we can use hard coded Lennard-Jones or Aziz potential
-POTENTIAL   LJ
-# ... or a user defined potential written in LUA
-# it has to be : POTENTIAL PLUGIN {type} {path to plugin file} {potential function name} {gradient function name}
-# for the moment {type} is PAIR or FFI :
-# - PAIR means that the lua function just works on a pair of atoms
-# - FFI  means that the lua function uses LUAJIT/FFI allowing to work on the whole atomic system
-# Examples : 
-# POTENTIAL PLUGIN PAIR plugins/lj_n_m.lua       lj_v_n_m_pair    lj_dv_n_m_pair
-# POTENTIAL PLUGIN FFI  plugins/lj_n_m_ffi.lua   lj_v_n_m_ffi     lj_dv_n_m_ffi
-# see the provided files in the plugins subdirectory
+# integration method to use : LANGEVIN or BROWNIAN
+# friction coefficicent in ps^-1
+# timestep in ps
+METHOD BROWNIAN FRICTION 1.0 TIMESTEP 0.001
 
-# unit of energy can be REDUCED (k_boltz*T/epsilon) or CHARMM (kcal/mol)
-UNITS   REDUCED
-#UNITS  CHARMM
+NATOMS 250
 
-#set the numb. of atoms
-NATOMS  55
-# reduced temperature
-TEMP    0.35
-# or temperature in Kelvin if CHARMM units are used
-#TEMP   110
+# temperature in Kelvin
+TEMP   300
 
-# number of steps : coded as an unsigned 64-bits integer so values of several billions
-# are perfectly valid !
-NSTEPS  10000000
+# number of steps : coded as an unsigned 64-bits integer
+NSTEPS 200000
 
-#MAXIMAL distance move in Angstroems for MC moves
-#DMAX   0.15
-# or automatically optimised dmax : each UPDATE steps dmax is adjust for reaching
-# TARGET (in %) of acceptance
-DMAX    0.25    UPDATE  100 TARGET  50.0
+# For each type of atom, set the mass and Lennard Jones parameters
+# units: amu, kj/mol and nanometers
+#PARAMS    AR      MASS    39.9480  EPSILON  1.045120    SIGMA   0.3345
+PARAMS    NE      MASS    20.1797  EPSILON  0.310056    SIGMA   0.2782
 
-# For each type of atom, set the Lennard Jones parameters
-# Here example for reduced units
-LJPARAMS    A  EPSILON 1.0 SIGMA   1.00
-#LJPARAMS    B  EPSILON 1.0 SIGMA   1.05
+#reduced units
+#PARAMS    AR      MASS    39.9480  EPSILON  1    SIGMA   1
 
 # Build the atomic system
-
 #one type of atom, initial coordinates randomly generated
-ATOM    1   TO  END A   COOR    RANDOM
+ATOM    1   TO  END     NE   COOR    RANDOM
 
 #or coordinates read from a xyz file
-#ATOM    1   TO  END B   COOR    FILE   'file.xyz'   
+#ATOM    1   TO  END    AR   COOR    FILE   'file.xyz'
 
 # example of binary system built by hand
-#ATOM    1   TO  17    A   COOR    RANDOM
-#ATOM    18  TO  END   B   COOR    RANDOM
-
-# regularly save energy to a file
-SAVE    ENER    'ener.dat'  EACH    1000
+#ATOM    1   TO  30    AR   COOR    RANDOM
+#ATOM    31  TO  END   NE   COOR    RANDOM
 
 # save initial and final coordinates to xyz files
-SAVE    COOR    FIRST   XYZ 'init.xyz'
-SAVE    COOR    LAST    XYZ 'last.xyz'
+SAVE    COOR    FIRST   XYZ     'init.xyz'
+SAVE    COOR    LAST    XYZ     'last.xyz'
 
 # regularly save the trajectory to a file (only dcd available for the moment)
 SAVE    COOR    TRAJ    DCD 'traj.dcd'  EACH    1000
 
-# monte carlo method to use :
-# metropolis, no extra argument required
-METHOD  METROP
 
 
 

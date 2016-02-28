@@ -32,7 +32,10 @@ typedef enum
 } INTEGRATORS;
 
 MyOpenMMData* init_omm(ATOM atoms[], DATA* dat);
-
+void doNsteps_omm(MyOpenMMData* omm, int numSteps);
+void getState_omm(MyOpenMMData* omm, int wantEnergy, 
+                  double* timeInPs, double* energyInKcal,
+                  ATOM atoms[], DATA* dat);
 void terminate_omm(MyOpenMMData* omm);
 
 #endif // OMMINTERFACE_H_INCLUDED

@@ -21,7 +21,6 @@
 #include "global.h"
 #include "tools.h"
 #include "rand.h"
-#include "ener.h"
 #include "logger.h"
 
 /**
@@ -93,22 +92,12 @@ void build_cluster(ATOM at[], DATA *dat, uint32_t from, uint32_t to, int32_t mod
     else if (mode==1)	//random mode
     {
         double randvec[3] = {0.0} ;
-//        double rtot=0.0;
-//
-//        for (i=0; i<dat->natom; i++)
-//            rtot += at[i].ljp.sig;
-//        
-//        rtot /= (double)dat->natom;
-//        rtot = (double)dat->natom*4.0*3.14159*X3(rtot)/3.0;
-//        dat->inid = pow(3.0*rtot/(4.0*3.14159),0.333);
-        dat->inid = dat->natom/8.0;
-        
+
+        dat->inid = dat->natom/4.0;
+
         for (i=from; i<to; i++)
         {
-            
-//             fprintf(stdout,"loop %d\n",i);
-//             fflush(stdout);
-            
+
             do
             {
                 get_vector(dat,-1,randvec);
@@ -141,7 +130,7 @@ int32_t  no_conflict(ATOM at[],uint32_t i)
     {
         d = X2(at[i].x-at[j].x) +  X2(at[i].y-at[j].y) + X2(at[i].z-at[j].z) ;
         d = sqrt(d);
-        if (d < ((at[i].ljp.sig+at[j].ljp.sig)/2.0))
+        if (d < ((at[i].pars.sig+at[j].pars.sig)/2.0))
         {
 //             fprintf(stderr,"[Info] Atoms %3d and %3d too close for starting configuration : generating new coordinates for atom %3d\n",j,i,i);
             LOG_PRINT(LOG_INFO,"Atoms %d and %d too close for starting configuration : generating new coordinates for atom %3d\n",j,i,i);
@@ -149,34 +138,6 @@ int32_t  no_conflict(ATOM at[],uint32_t i)
         }
     }
     return NO_CONFLICT;
-}
-
-/**
- * @brief Adjusts the d_max parameter i.e. the maximum move in Angstroems applied to a coordinate
- *      Value is adjusted for reaching d_max_tgt
- *      
- * @param dat Common data for simulation
- * @param step Step at which adjustment is done
- * @param acc The current number of accepted move since last call to this function
- */
-void adj_dmax(DATA *dat, uint64_t *step, uint64_t *acc)
-{
-    if (*step != 0 && *step%dat->d_max_when==0)
-    {
-        double ratio = (double)*acc/(double)dat->d_max_when;
-        double new_dmax = dat->d_max;
-
-        if (ratio > dat->d_max_tgt/100)
-            new_dmax *= 1.10 ;
-        else
-            new_dmax *= 0.90 ;
-        *acc = 0 ;
-        if (new_dmax > 1.0) new_dmax = 1.0;
-        if (new_dmax < 0.01) new_dmax = 0.01;
-
-        LOG_PRINT(LOG_INFO,"d_max update at step %"PRIu64" : ratio = %lf ; old_dmax = %lf ; new_dmax = %lf\n",*step,ratio,dat->d_max,new_dmax);
-        dat->d_max = new_dmax;
-    }
 }
 
 /**

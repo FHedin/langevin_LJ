@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Florent Hedin, Markus Meuwly, and the University of Basel
+# Copyright (c) 2016, Florent Hedin, Markus Meuwly, and the University of Basel
 # All rights reserved.
 # The 3-clause BSD license is applied to this software.
 # see LICENSE.txt
@@ -14,8 +14,6 @@ endif (NOT CMAKE_BUILD_TYPE)
 
 set(TGT "langevin_LJ" CACHE STRING "The executable name.")
 
-set(USE_LUA "OFF" CACHE STRING "Enable LUA scripting capability")
-
 set(USE_OMM "ON" CACHE STRING "Enable use of the OpenMM librqry")
 
 project(${TGT} C)
@@ -27,16 +25,6 @@ include
 dSFMT
 )
 
-# if Lua scripts are required for custom energy evaluation, we may need here the path where to find lua.h
-if (USE_LUA)
-include_directories(
-    #/usr/include
-    #/usr/local/include/lua53
-    /usr/local/include/luajit-2.0
-    #/usr/local/lua-5.3.0/include
-)
-endif()
-
 if (USE_OMM)
 include_directories(
     /usr/local/openmm/include
@@ -46,15 +34,11 @@ endif()
 # list all source files
 set(
 SRCS
-src/ener.c
 src/io.c
 src/logger.c
 src/main.c
-src/MCclassic.c
 src/memory.c
-src/minim.c
 src/parsing.c
-src/plugins_lua.c
 src/rand.c
 src/tools.c
 dSFMT/dSFMT.c
@@ -65,17 +49,6 @@ src/ommInterface.c
 add_definitions(-DHAVE_SSE2 -DDSFMT_MEXP=19937)
 # if you want to disable dSFMT and use the standard C random numbers (NOT RECOMMENDED), comment previous line and uncomment the following :
 #add_definitions(-DSTDRAND)
-
-if (USE_LUA)
-    # if user wants to enable use of external lua scripts for energy evaluation
-    add_definitions(-DLUA_PLUGINS)
-
-    # if -DLUA_PLUGINS was added we may need the path where to find liblua*.so of libluajit*.so
-    link_directories(/usr/local/lib)
-    #link_directories(/usr/local/lua-5.3.0/lib)
-    #link_directories(/usr/lib64/libluajit-5.1.so)
-    #link_directories(/usr/lib64)
-endif()
 
 if (USE_OMM)
   link_directories(/usr/local/openmm/lib)
@@ -94,14 +67,6 @@ if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
 
     # clang
     target_link_libraries(${TGT} m)
-
-    if (USE_LUA)
-        # clang with lua
-        #target_link_libraries(${TGT} m lua-5.3)
-
-        # clang with luajit
-        target_link_libraries(${TGT} m luajit-5.1)
-    endif()
     
     if (USE_OMM)
         target_link_libraries(${TGT} m OpenMM)
@@ -118,15 +83,6 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
 
     # gcc
     target_link_libraries(${TGT} m)
-
-    if (USE_LUA)
-        # gcc with lua
-        #target_link_libraries(${TGT} m lua)
-        #target_link_libraries(${TGT} m lua-5.2)
-        
-        # gcc with luajit
-        target_link_libraries(${TGT} m luajit-5.1)
-    endif()
     
     if (USE_OMM)
         target_link_libraries(${TGT} m OpenMM)
@@ -143,16 +99,7 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "Intel")
     
     # icc
     target_link_libraries(${TGT} m)
-    
-    
-    if (USE_LUA)
-        # icc with luajit
-        target_link_libraries(${TGT} m luajit-5.1)
 
-        # icc with lua
-        #target_link_libraries(${TGT} m lua)
-        #target_link_libraries(${TGT} m lua-5.2)
-    endif()
     
     if (USE_OMM)
         target_link_libraries(${TGT} m OpenMM)

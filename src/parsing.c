@@ -20,28 +20,25 @@
 
 #include "global.h"
 #include "io.h"
-#include "ener.h"
 #include "tools.h"
 #include "logger.h"
-#include "plugins_lua.h"
 
-///the array of LJ-params size
-static uint32_t lj_size = 0 ;
+///the array of params size
+static uint32_t pars_size = 0 ;
 
 /**
- * @brief his function parses the input file, fills many fields of the DATA and SPDAT structures,
+ * @brief his function parses the input file, fills fields of the DATA structure,
  * and allocates the ATOM list.
  * 
  * @note strcasecmp(...) is used so the input file is case insensitive
  * 
  * @param fname Path to the input file to open
  * @param dat Common data
- * @param spdat Common data for Spatial Averaging
  * @param at The atom list
  */
 void parse_from_file(char fname[], DATA *dat, ATOM **at)
 {
-    LJPARAMS *ljpars=NULL;
+    PARAMS *pars=NULL;
 
     char buff1[FILENAME_MAX]="", *buff2=NULL, *buff3=NULL ;
 
@@ -73,86 +70,23 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
             ///to know which MC method we use
             if (!strcasecmp(buff2,"METHOD"))
             {
-                ///no extra parameter for Metropolis currently
-                if (!strcasecmp(buff3,"METROP"))
-                    sprintf(dat->method,"%s",buff3);
+                if (!strcasecmp(buff3,"LANGEVIN"))
+                  sprintf(dat->method,"%s",buff3);
+                else if (!strcasecmp(buff3,"BROWNIAN"))
+                  sprintf(dat->method,"%s",buff3);
                 else
                 {
-                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be METROP.\n",buff2,buff3);
+                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be LANGEVIN or BROWNIAN.\n",buff2,buff3);
                 }
+                
+                char *friction=NULL , *tstep=NULL;
+                friction = strtok(NULL," \n\t");
+                friction = strtok(NULL," \n\t");
+                tstep = strtok(NULL," \n\t");
+                tstep = strtok(NULL," \n\t");
+                dat->friction = atof(friction);
+                dat->timestep = atof(tstep);
             }
-            ///get type of potential we plan to use
-            else if (!strcasecmp(buff2,"POTENTIAL"))
-            {
-                ///available : hard coded LJ potential, and user defined potential read from LUA script
-                if (strcasecmp(buff3,"LJ") && strcasecmp(buff3,"PLUGIN"))
-                {
-                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be LJ or PLUGIN.\n",buff2,buff3);
-                }
-                else
-                {
-                    ///the user of pointers to functions avoids the use of if(...) in energy functions so code is faster
-                    if (!strcasecmp(buff3,"LJ"))
-                    {
-                        get_ENER = &(get_LJ_V);
-                        get_DV = &(get_LJ_DV);
-                    }
-#ifdef LUA_PLUGINS
-                    /**
-                     * for the lua plugin potentials the two mode are 
-                     *  - PAIR where the user will write code returning the v and dv contribution for 2 atoms only
-                     *  - FFI where the user will have access from the LUA code to the data structures defined in global.h ; only available if your
-                     *      LUA installation come with the FFI package, included by default with luajit (see online)
-                     * 
-                     */
-                    else if (!strcasecmp(buff3,"PLUGIN"))
-                    {
-                        char *buff4=NULL , *buff5=NULL , *buff6=NULL , *buff7=NULL;
-//                         PLUGIN_TYPE plug_type;
-                        buff4=strtok(NULL," \n\t");
-                        buff5=strtok(NULL," \n\t");
-                        buff6=strtok(NULL," \n\t");
-                        buff7=strtok(NULL," \n\t");
-                        
-                        if (!strcasecmp(buff4,"PAIR"))
-                        {
-                            lua_plugin_type = PAIR;
-                            get_ENER = &(get_lua_V);
-                            get_DV = &(get_lua_DV);
-                        }
-                        else if (!strcasecmp(buff4,"FFI"))
-                        {
-                            lua_plugin_type = FFI;
-                            get_ENER = &(get_lua_V_ffi);
-                            get_DV = &(get_lua_DV_ffi);
-                        }
-                        else
-                        {
-                            LOG_PRINT(LOG_ERROR,"Plugin type %s is unknown. Must be PAIR or FFI.\n",buff4);
-                            exit(-1);
-                        }
-                        
-                        /// open lua file and register function name
-                        init_lua(buff5);
-                        register_lua_function(buff6,POTENTIAL);
-                        register_lua_function(buff7,GRADIENT);
-                    }
-#endif
-                }
-            }
-            /// units to use during simulation
-            /// reduced units recommended, CHARMM units are experimental
-//             else if (!strcasecmp(buff2,"UNITS"))
-//             {
-//                 if (!strcasecmp(buff3,"REDUCED"))
-//                     charmm_units=0;
-//                 else if (!strcasecmp(buff3,"CHARMM"))
-//                     charmm_units=1;
-//                 else
-//                 {
-//                     LOG_PRINT(LOG_WARNING,"%s %s is unknown. Must be CHARMM or REDUCED.\n",buff2,buff3);
-//                 }
-//             }
             /// section where saving of energy, coordinates and trajectory is handled
             else if (!strcasecmp(buff2,"SAVE"))
             {
@@ -211,44 +145,31 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
             /// define number of steps as 64 bits integer
             else if (!strcasecmp(buff2,"NSTEPS"))
                 dat->nsteps = (uint64_t) strtoull(buff3,NULL,0);    //atol(buff3);
-            /// defines the dmax and if we want it fixed or automatically updated
-            else if (!strcasecmp(buff2,"DMAX"))
-            {
-                char *mode=NULL , *each=NULL , *target=NULL;
-                dat->d_max=atof(buff3);
-                mode=strtok(NULL," \n\t");
-                dat->d_max_when=0;
-                dat->d_max_tgt=0.0;
-
-                /// if we want dmax to be automatically updated. see global.h and tools.c for details
-                if (!strcasecmp(mode,"UPDATE"))
-                {
-                    each=strtok(NULL," \n\t");
-                    target=strtok(NULL," \n\t"); //junk
-                    target=strtok(NULL," \n\t");
-                    dat->d_max_when = (uint32_t) atoi(each);
-                    dat->d_max_tgt=atof(target);
-                }
-            }
             /// define a list of LJ parameters
-            else if (!strcasecmp(buff2,"LJPARAMS"))
+            else if (!strcasecmp(buff2,"PARAMS"))
             {
-                char *type=buff3 , *epsi=NULL , *sigma=NULL ;
+                char *type=buff3 , *mass=NULL, *epsi=NULL , *sigma=NULL ;
 
                 /// the array grows each time a LJPARAMS section is detected
-                ljpars=(LJPARAMS*)realloc(ljpars,(lj_size+1)*sizeof(LJPARAMS));
+                pars=(PARAMS*)realloc(pars,(pars_size+1)*sizeof(PARAMS));
 
-                sprintf(ljpars[lj_size].sym,"%s",type);
+                sprintf(pars[pars_size].sym,"%s",type);
 
+                mass=strtok(NULL," \n\t");
+                mass=strtok(NULL," \n\t");
+                pars[pars_size].mass=atof(mass);
+                
+                pars[pars_size].charge=0.0;
+                
                 epsi=strtok(NULL," \n\t");
                 epsi=strtok(NULL," \n\t");
-                ljpars[lj_size].eps=atof(epsi);
+                pars[pars_size].eps=atof(epsi);
 
                 sigma=strtok(NULL," \n\t");
                 sigma=strtok(NULL," \n\t");
-                ljpars[lj_size].sig=atof(sigma);
+                pars[pars_size].sig=atof(sigma);
 
-                lj_size++;
+                pars_size++;
             }
             /// for building atom list manually
             else if (!strcasecmp(buff2,"ATOM"))
@@ -276,12 +197,14 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
                 for(i=j; i<k; i++)
                 {
                     sprintf((*at)[i].sym,"%s",type);
-                    for(l=0; l<lj_size; l++)
+                    for(l=0; l<pars_size; l++)
                     {
-                        if (!strcasecmp(ljpars[l].sym,(*at)[i].sym))
+                        if (!strcasecmp(pars[l].sym,(*at)[i].sym))
                         {
-                            (*at)[i].ljp.eps=ljpars[l].eps;
-                            (*at)[i].ljp.sig=ljpars[l].sig;
+                            (*at)[i].pars.mass=pars[l].mass;
+                            (*at)[i].pars.charge=pars[l].charge;
+                            (*at)[i].pars.eps=pars[l].eps;
+                            (*at)[i].pars.sig=pars[l].sig;
                             break;
                         }
                     }
@@ -327,5 +250,5 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
     }
 
     fclose(ifile);
-    free(ljpars);
+    free(pars);
 }

@@ -1,7 +1,7 @@
 /**
  * \file main.c
  *
- * \brief C program for MC simulations of Lennard Jones clusters.
+ * \brief C program for simulation of Lennard Jones clusters.
  *
  * \authors Florent Hedin (University of Basel, Switzerland) \n
  *          Markus Meuwly (University of Basel, Switzerland)
@@ -31,15 +31,11 @@
 #endif
 
 #include "global.h"
-#include "MCclassic.h"
 #include "tools.h"
 #include "rand.h"
-#include "ener.h"
-#include "minim.h"
 #include "io.h"
 #include "parsing.h"
 #include "logger.h"
-#include "plugins_lua.h"
 
 // -----------------------------------------------------------------------------------------
 
@@ -73,22 +69,14 @@ uint32_t is_stdout_redirected=0;
 LOG_LEVELS LOG_SEVERITY = LOG_WARNING;
 
 /*
- * Type of Lua plugin, i.e. PAIR or FFI (see "plugins_lua.h")
- */
-#ifdef LUA_PLUGINS
-LUA_PLUGIN_TYPE lua_plugin_type = PAIR;
-#endif
-
-/*
  *  End of global variables initialisation
  */
 
 // -----------------------------------------------------------------------------------------
 
 //prototypes of functions written in this main.c
-void start_classic(DATA *dat, ATOM at[]);
+void run_md(DATA *dat, ATOM at[]);
 void help(char **argv);
-void getValuesFromDB(DATA *dat);
 
 // -----------------------------------------------------------------------------------------
 /**
@@ -118,9 +106,6 @@ int main(int argc, char** argv)
     DATA dat ;
     ATOM *at = NULL;
 
-    // function pointers for energy and gradient, and trajectory
-    get_ENER = NULL;
-    get_DV = NULL;
     write_traj= &(write_dcd);
 
     // arguments parsing
@@ -232,78 +217,27 @@ int main(int argc, char** argv)
     // parse input file, initialise atom list
     parse_from_file(inpf,&dat,&at);
 
-    // set the pointer to the default V and dV functions
-    if(get_ENER==NULL)
-        get_ENER = &(get_LJ_V);
-
-    if(get_DV==NULL)
-        get_DV = &(get_LJ_DV);
-
-    // allocate arrays used by energy minimisation function
-    alloc_minim(&dat);
-
     // summary of parameters to output file
-
     fprintf(stdout,"\nStarting program in sequential mode\n\n");
 
     fprintf(stdout,"Seed   = %s \n\n",seed);
 
-    if (get_ENER==&(get_LJ_V))
-        fprintf(stdout,"Using L-J potential\n");
-#ifdef LUA_PLUGINS
-    else if (get_ENER==&(get_lua_V))
-        fprintf(stdout,"Using plugin pair potential\n");
-    else if (get_ENER==&(get_lua_V_ffi))
-        fprintf(stdout,"Using plugin ffi potential\n");
-#endif
-    
-//     if (charmm_units)
-//         fprintf(stdout,"Using CHARMM  units.\n\n");
-//     else
-    
-    fprintf(stdout,"Using REDUCED units.\n\n");
+    fprintf(stdout,"Using OpenMM toolkit for energy and integration\n");
 
     fprintf(stdout,"Energy      saved each %d  steps in file %s\n",io.esave,io.etitle);
     fprintf(stdout,"Trajectory  saved each %d  steps in file %s\n",io.trsave,io.trajtitle);
     fprintf(stdout,"Initial configuration saved in file %s\n",io.crdtitle_first);
     fprintf(stdout,"Final   configuration saved in file %s\n\n",io.crdtitle_last);
 
-    // get values of best minima for several well known LJ clusters
-    getValuesFromDB(&dat);
-
-    // set the inverse temperature depending of the type of units used
-//     if (charmm_units)
-    dat.beta = 1.0/(KBCH*dat.T);
-//     else
-//         dat.beta = 1.0/(dat.T);
-
     // again print parameters
-    fprintf(stdout,"method = %s\n",dat.method);
-    fprintf(stdout,"natom  = %d\n",dat.natom);
-    fprintf(stdout,"nsteps = %"PRIu64"\n",dat.nsteps);
-    fprintf(stdout,"T      = %lf \n",dat.T);
-    fprintf(stdout,"beta   = %lf\n",dat.beta);
+    fprintf(stdout,"method   = %s\n",dat.method);
+    fprintf(stdout,"natom    = %d\n",dat.natom);
+    fprintf(stdout,"nsteps   = %"PRIu64"\n",dat.nsteps);
+    fprintf(stdout,"T        = %lf \n",dat.T);
+    fprintf(stdout,"friction = %lf \n",dat.friction);
+    fprintf(stdout,"tstep    = %lf \n\n",dat.timestep);
 
-    if(dat.d_max_when==0)
-        fprintf(stdout,"dmax   = %lf (fixed) \n\n",dat.d_max);
-    else
-        fprintf(stdout,"dmax   = %4.2lf updated each %d steps for "
-                "targeting %4.2lf %% of acceptance \n\n",dat.d_max,dat.d_max_when,dat.d_max_tgt);
-
-    // then depending of the type of simulation run calculation
-    if (strcasecmp(dat.method,"metrop")==0)
-    {
-        start_classic(&dat,at);
-    }
-    else
-    {
-        LOG_PRINT(LOG_ERROR,"Method [%s] unknowm.\n",dat.method);
-        free(dat.rn);
-#ifndef STDRAND
-        free(dat.seeds);
-#endif
-        exit(-3);
-    }
+    run_md(&dat,at);
 
 #ifdef __unix__
     // compatible with some unixes-like OS: the struct rusage communicates with the kernel directly.
@@ -323,11 +257,6 @@ int main(int argc, char** argv)
     free(dat.seeds);
 #endif
     free(at);
-    dealloc_minim();
-
-#ifdef LUA_PLUGINS
-    end_lua();
-#endif //LUA_PLUGINS
 
     // closing log files is the last thing to do as errors may occur at the end
     close_logfiles();
@@ -336,51 +265,107 @@ int main(int argc, char** argv)
 }
 
 // -----------------------------------------------------------------------------------------
+
+#include "ommInterface.h"
+
 /**
- * \brief   This function starts a standard Metropolis Monte Carlo simulation.
+ * \brief   This function starts a Langevin or Brownian MD simulation
  *
  * \details This function is first in charge of opening all the output (coordinates, trajectory and energy) files.\n
- *          Then the function \b #make_MC_moves starting the simulation is called.\n
+ *          Then it runs the MD using openMM code.\n
  *          In the end it prints results, close the files and goes back to the function \b #main.
  *
  * \param   dat is a structure containing control parameters common to all simulations.
  * \param   at[] is an array of structures ATOM containing coordinates and other variables.
  */
-void start_classic(DATA *dat, ATOM at[])
+void run_md(DATA *dat, ATOM at[])
 {
-    double ener = 0.0 ;
-    uint64_t acc=0;
+  
+  if(!strcasecmp(dat->method,"LANGEVIN"))
+  {
+    dat->integrator = LANGEVIN;
+  }
+  else if(!strcasecmp(dat->method,"BROWNIAN"))
+  {
+    dat->integrator = BROWNIAN;
+  }
+  
+  // initialise openMM code
+  MyOpenMMData* omm = init_omm(at,dat);
+  
+  fprintf(stdout,"OpenMM initialised with platform : %s\n\n",omm->platformName);
+  
+  //open required files
+  crdfile=fopen(io.crdtitle_first,"wt");
+  efile=fopen(io.etitle,"wb");
+  traj=fopen(io.trajtitle,"wb");
 
-    //open required files
-    crdfile=fopen(io.crdtitle_first,"wt");
-    efile=fopen(io.etitle,"wb");
-    traj=fopen(io.trajtitle,"wb");
-
-    //write initial coordinates
-    write_xyz(at,dat,0,crdfile);
-    fclose(crdfile);
-
-    //get initial energy of whole system
-    ener = (*get_ENER)(at,dat,-1);
-    fprintf(stdout,"\nStarting METROP Monte-Carlo\n");
-    fprintf(stdout,"LJ initial energy is : %lf \n\n",ener);
-
-    //CALL TO MAIN mc FUNCTION
-    acc=make_MC_moves(at,dat,&ener);
-    //simulation finished here
+  //write initial coordinates
+  write_xyz(at,dat,0,crdfile);
+  fclose(crdfile);
+  
+  // TODO : code calling openMM for performing MD
+  double time;
+  double energy;
+  
+  // get initial energy
+  getState_omm(omm,1,&time,&energy,at,dat);
+  fprintf(stdout,"time (ps) energy (kj/mol) : %lf\t%lf\n",time,energy);
+  
+  uint64_t steps = 0;
+  do
+  {
+  // do some steps
+  doNsteps_omm(omm,io.trsave);
+  
+  //get time energy and coordinates
+  getState_omm(omm,1,&time,&energy,at,dat);
+  fprintf(stdout,"time (ps) energy (kj/mol) : %lf\t%lf\n",time,energy);
+  
+  //write trajectory
+  write_traj(at,dat,0);
+  
+  steps += io.trsave;
+  
+  }while(steps<dat->nsteps);
+  
+  // END TODO
     
-    fprintf(stdout,"\n\nLJ final energy is : %lf\n",ener);
-    fprintf(stdout,"Acceptance ratio is %lf %% \n",100.0*(double)acc/(double)dat->nsteps);
-    fprintf(stdout,"Final dmax = %lf\n",dat->d_max);
-    fprintf(stdout,"End of METROP Monte-Carlo\n\n");
-
-    //write last coordinates
-    crdfile=fopen(io.crdtitle_last,"wt");
-    write_xyz(at,dat,dat->nsteps,crdfile);
-    
-    fclose(crdfile);
-    fclose(traj);
-    fclose(efile);
+  terminate_omm(omm);
+  
+//     double ener = 0.0 ;
+//     uint64_t acc=0;
+// 
+//     //open required files
+//     crdfile=fopen(io.crdtitle_first,"wt");
+//     efile=fopen(io.etitle,"wb");
+//     traj=fopen(io.trajtitle,"wb");
+// 
+//     //write initial coordinates
+//     write_xyz(at,dat,0,crdfile);
+//     fclose(crdfile);
+// 
+//     //get initial energy of whole system
+//     ener = (*get_ENER)(at,dat,-1);
+//     fprintf(stdout,"\nStarting METROP Monte-Carlo\n");
+//     fprintf(stdout,"LJ initial energy is : %lf \n\n",ener);
+// 
+//     //CALL TO MAIN mc FUNCTION
+//     acc=make_MC_moves(at,dat,&ener);
+//     //simulation finished here
+//     
+//     fprintf(stdout,"\n\nLJ final energy is : %lf\n",ener);
+//     fprintf(stdout,"Acceptance ratio is %lf %% \n",100.0*(double)acc/(double)dat->nsteps);
+//     fprintf(stdout,"Final dmax = %lf\n",dat->d_max);
+//     fprintf(stdout,"End of METROP Monte-Carlo\n\n");
+// 
+//     //write last coordinates
+//     crdfile=fopen(io.crdtitle_last,"wt");
+//     write_xyz(at,dat,dat->nsteps,crdfile);
+//     
+//     fclose(crdfile);
+//     fclose(traj);
+//     fclose(efile);
 }
 
 // -----------------------------------------------------------------------------------------
@@ -400,60 +385,3 @@ void help(char **argv)
     fprintf(stdout,"Example : \n %s -i input_file -seed 1330445520 -o out.txt -log info \n\n",argv[0]);
     fprintf(stdout,"The default logging level is 'warn' \n");
 }
-
-// -----------------------------------------------------------------------------------------
-/**
- * \brief   This sets variables possibly used when minimising the energy function.
- *
- * \details Depending of the value of \b dat->natom this sets the variables \b dat->E_steepD,
- *          which may be used as a threshold for starting Steepest Descent minimisation, and
- *          \b dat->E_expected which is the energy of the best minimum.
- *
- * \param   dat is a structure containing control parameters common to all simulations.
- */
-void getValuesFromDB(DATA *dat)
-{
-    if (dat->natom==13)
-    {
-        dat->E_steepD   = -33.0;
-        dat->E_expected = -44.326801;
-    }
-    else if (dat->natom==19)
-    {
-        dat->E_steepD   = -66.0;
-        dat->E_expected = -72.659782;
-    }
-    else if (dat->natom==31)
-    {
-        dat->E_steepD   = -129.0;
-        dat->E_expected = -133.586422;
-    }
-    else if (dat->natom==37)
-    {
-        dat->E_steepD   = -162;
-        dat->E_expected = -167.033672;
-    }
-    else if (dat->natom==38)
-    {
-        dat->E_steepD   = -167.5;
-        dat->E_expected = -173.928427;
-    }
-    else if (dat->natom==55)
-    {
-        dat->E_steepD   = -270.5;
-        dat->E_expected = -279.248470;
-    }
-    else if (dat->natom==75)
-    {
-        dat->E_steepD   = -388.0;
-        dat->E_expected = -397.492331;
-    }
-    else
-    {
-        dat->E_steepD   = -999999999.999999;
-        dat->E_expected = -999999999.999999;
-    }
-}
-
-// -----------------------------------------------------------------------------------------
-
