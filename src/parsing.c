@@ -142,17 +142,17 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
             }
             /// units to use during simulation
             /// reduced units recommended, CHARMM units are experimental
-            else if (!strcasecmp(buff2,"UNITS"))
-            {
-                if (!strcasecmp(buff3,"REDUCED"))
-                    charmm_units=0;
-                else if (!strcasecmp(buff3,"CHARMM"))
-                    charmm_units=1;
-                else
-                {
-                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Must be CHARMM or REDUCED.\n",buff2,buff3);
-                }
-            }
+//             else if (!strcasecmp(buff2,"UNITS"))
+//             {
+//                 if (!strcasecmp(buff3,"REDUCED"))
+//                     charmm_units=0;
+//                 else if (!strcasecmp(buff3,"CHARMM"))
+//                     charmm_units=1;
+//                 else
+//                 {
+//                     LOG_PRINT(LOG_WARNING,"%s %s is unknown. Must be CHARMM or REDUCED.\n",buff2,buff3);
+//                 }
+//             }
             /// section where saving of energy, coordinates and trajectory is handled
             else if (!strcasecmp(buff2,"SAVE"))
             {

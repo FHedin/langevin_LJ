@@ -67,7 +67,7 @@ extern uint32_t is_stdout_redirected;
 /// if we decide to use CHARMM units instead of reduced units (not recommended!)
 /// 0 = reduced units
 /// 1 = CHARMM units
-extern uint32_t charmm_units;
+// extern uint32_t charmm_units;
 
 #ifdef _OPENMP
 extern uint32_t ncpus;
@@ -89,7 +89,12 @@ typedef struct
     double d_max_tgt;       ///< d_max will be tuned in order to reach d_max_tgt percents of moves acceptance
 
     double inid ;       ///< An initial distance term used when randomly assigning coordinates to atoms when generating a cluster
-    double T ;          ///< Temperature : in reduced units, or kcal/mol if charmm_units is 1
+    
+    double T ;          ///< Temperature : in Kelvin
+    uint8_t integrator; ///< The type on integrator used : Langevin (0) or Brownian (1)
+    double friction ;   ///< Friction for Langevin/Brownian integrator : in ps^-1
+    double timestep;    ///< Timestep for Langevin/Brownian integrator : in ps
+    
     double E_constr;    ///< An energy constraints for avoiding "cluster evaporation" : avoids that atoms go to far from each other : see ener.c for details
     double E_steepD;    ///< A threshold at which starting Steepest Descent minimisation
     double E_expected;  ///< Expected best energy minima of the cluster currently studied ; usually taken from http://www-wales.ch.cam.ac.uk/CCD.html
@@ -123,7 +128,9 @@ typedef struct
     double y;   ///< Y coordinate
     double z;   ///< Z coordinate
     char sym[4] ;   ///< atomic symbol
-    LJPARAMS ljp;    ///< substructure containing LJ parameters
+    double mass;    ///< atomic mass
+    double charge;  ///< atomic charge ; unused
+    LJPARAMS ljp;   ///< substructure containing LJ parameters
 } ATOM;
 
 /**

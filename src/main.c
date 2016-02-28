@@ -61,15 +61,8 @@ FILE *efile=NULL;
 /*
  * boolean like values
  * is the stdout redirected ?
- * are we using charmm units ?
  */
 uint32_t is_stdout_redirected=0;
-uint32_t charmm_units=0;
-
-#ifdef _OPENMP
-//for para execution we will try to get the number of cpus and threads available
-uint32_t ncpus=1,nthreads=1;
-#endif
 
 /*
  * Errors, warning, etc ... --> logging.
@@ -175,17 +168,6 @@ int main(int argc, char** argv)
             else
                 fprintf(stdout,"[Warning] Unknown log level '%s' : default value used.\n\n",argv[i]);
         }
-#ifdef _OPENMP
-        // if compiled with openMP the user can specify a maximum number of cpus to use
-        // check if it is not higher than the real amount of cpus
-        else if (!strcasecmp(argv[i],"-np"))
-        {
-            nthreads=atoi(argv[++i]);
-            ncpus=omp_get_num_procs();
-            (nthreads < ncpus) ? omp_set_num_threads(nthreads) : omp_set_num_threads(ncpus);
-            //omp_set_num_threads(nthreads);
-        }
-#endif
         // print help and proper exit
         else if ( !strcasecmp(argv[i],"-h") || !strcasecmp(argv[i],"-help") || !strcasecmp(argv[i],"--help") )
         {
@@ -260,13 +242,9 @@ int main(int argc, char** argv)
     // allocate arrays used by energy minimisation function
     alloc_minim(&dat);
 
-    // sum up parameters to output file
+    // summary of parameters to output file
 
-#ifdef _OPENMP
-    fprintf(stdout,"\nStarting program with %d threads (%d cpus available)\n\n",nthreads,ncpus);
-#else
     fprintf(stdout,"\nStarting program in sequential mode\n\n");
-#endif
 
     fprintf(stdout,"Seed   = %s \n\n",seed);
 
@@ -279,10 +257,11 @@ int main(int argc, char** argv)
         fprintf(stdout,"Using plugin ffi potential\n");
 #endif
     
-    if (charmm_units)
-        fprintf(stdout,"Using CHARMM  units.\n\n");
-    else
-        fprintf(stdout,"Using REDUCED units.\n\n");
+//     if (charmm_units)
+//         fprintf(stdout,"Using CHARMM  units.\n\n");
+//     else
+    
+    fprintf(stdout,"Using REDUCED units.\n\n");
 
     fprintf(stdout,"Energy      saved each %d  steps in file %s\n",io.esave,io.etitle);
     fprintf(stdout,"Trajectory  saved each %d  steps in file %s\n",io.trsave,io.trajtitle);
@@ -293,10 +272,10 @@ int main(int argc, char** argv)
     getValuesFromDB(&dat);
 
     // set the inverse temperature depending of the type of units used
-    if (charmm_units)
-        dat.beta = 1.0/(KBCH*dat.T);
-    else
-        dat.beta = 1.0/(dat.T);
+//     if (charmm_units)
+    dat.beta = 1.0/(KBCH*dat.T);
+//     else
+//         dat.beta = 1.0/(dat.T);
 
     // again print parameters
     fprintf(stdout,"method = %s\n",dat.method);
