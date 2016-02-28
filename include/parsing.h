@@ -17,6 +17,6 @@
 #define PARSING_H_INCLUDED
 
 /// will parse the input file
-void parse_from_file(char fname[], DATA *dat, SPDAT *spdat, ATOM **at);
+void parse_from_file(char fname[], DATA *dat, ATOM **at);
 
 #endif // PARSING_H_INCLUDED

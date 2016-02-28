@@ -179,53 +179,53 @@ void write_dcd(ATOM at[], DATA *dat, uint64_t when)
  * @param spdat Spatial Averaging Data structure
  * @param meth method used : 0 = metropolis and 1 = SA-MC
  */
-void write_rst(ATOM at[], DATA *dat, SPDAT *spdat, uint32_t meth)
-{
-    FILE *rstfile=NULL;
-    rstfile=fopen("restart.dat","wb");
-
-    /** From global.h **/
-    // 1 : write global variables
-    fwrite(&charmm_units,sizeof(uint32_t),1,rstfile);
-
-    // 2 : structure DATA
-    fwrite(&dat->natom,sizeof(uint32_t),1,rstfile);
-    fwrite(dat->method,sizeof(char),32,rstfile);
-    fwrite(&dat->nsteps,sizeof(uint64_t),1,rstfile);
-
-    fwrite(&dat->d_max,sizeof(double),1,rstfile);
-    fwrite(&dat->d_max_when,sizeof(uint32_t),1,rstfile);
-    fwrite(&dat->d_max_tgt,sizeof(double),1,rstfile);
-
-    fwrite(&dat->inid,sizeof(double),1,rstfile);
-    fwrite(&dat->T,sizeof(double),1,rstfile);
-    fwrite(&dat->E_steepD,sizeof(double),1,rstfile);
-    fwrite(&dat->E_expected,sizeof(double),1,rstfile);
-    fwrite(&dat->beta,sizeof(double),1,rstfile);
-
-    if(meth==1)
-    {
-        // 2 : structure SPDAT
-        fwrite(&spdat->meps,sizeof(uint32_t),1,rstfile);
-        fwrite(&spdat->neps,sizeof(uint32_t),1,rstfile);
-        fwrite(&spdat->weps,sizeof(double),1,rstfile);
-    }
-
-    // 3 : structure ATOM
-    for(uint32_t i=0; i<dat->natom; i++)
-    {
-        fwrite(&(at[i].x),sizeof(double),1,rstfile);
-        fwrite(&(at[i].y),sizeof(double),1,rstfile);
-        fwrite(&(at[i].z),sizeof(double),1,rstfile);
-        
-        fwrite(at[i].sym,sizeof(char),4,rstfile);
-        
-        fwrite(at[i].ljp.sym,sizeof(char),4,rstfile);
-        
-        fwrite(&(at[i].ljp.sig),sizeof(double),1,rstfile);
-        fwrite(&(at[i].ljp.eps),sizeof(double),1,rstfile);
-    }
-
-    /** END **/
-    fclose(rstfile);
-}
+// void write_rst(ATOM at[], DATA *dat, SPDAT *spdat, uint32_t meth)
+// {
+//     FILE *rstfile=NULL;
+//     rstfile=fopen("restart.dat","wb");
+// 
+//     /** From global.h **/
+//     // 1 : write global variables
+//     fwrite(&charmm_units,sizeof(uint32_t),1,rstfile);
+// 
+//     // 2 : structure DATA
+//     fwrite(&dat->natom,sizeof(uint32_t),1,rstfile);
+//     fwrite(dat->method,sizeof(char),32,rstfile);
+//     fwrite(&dat->nsteps,sizeof(uint64_t),1,rstfile);
+// 
+//     fwrite(&dat->d_max,sizeof(double),1,rstfile);
+//     fwrite(&dat->d_max_when,sizeof(uint32_t),1,rstfile);
+//     fwrite(&dat->d_max_tgt,sizeof(double),1,rstfile);
+// 
+//     fwrite(&dat->inid,sizeof(double),1,rstfile);
+//     fwrite(&dat->T,sizeof(double),1,rstfile);
+//     fwrite(&dat->E_steepD,sizeof(double),1,rstfile);
+//     fwrite(&dat->E_expected,sizeof(double),1,rstfile);
+//     fwrite(&dat->beta,sizeof(double),1,rstfile);
+// 
+//     if(meth==1)
+//     {
+//         // 2 : structure SPDAT
+//         fwrite(&spdat->meps,sizeof(uint32_t),1,rstfile);
+//         fwrite(&spdat->neps,sizeof(uint32_t),1,rstfile);
+//         fwrite(&spdat->weps,sizeof(double),1,rstfile);
+//     }
+// 
+//     // 3 : structure ATOM
+//     for(uint32_t i=0; i<dat->natom; i++)
+//     {
+//         fwrite(&(at[i].x),sizeof(double),1,rstfile);
+//         fwrite(&(at[i].y),sizeof(double),1,rstfile);
+//         fwrite(&(at[i].z),sizeof(double),1,rstfile);
+//         
+//         fwrite(at[i].sym,sizeof(char),4,rstfile);
+//         
+//         fwrite(at[i].ljp.sym,sizeof(char),4,rstfile);
+//         
+//         fwrite(&(at[i].ljp.sig),sizeof(double),1,rstfile);
+//         fwrite(&(at[i].ljp.eps),sizeof(double),1,rstfile);
+//     }
+// 
+//     /** END **/
+//     fclose(rstfile);
+// }

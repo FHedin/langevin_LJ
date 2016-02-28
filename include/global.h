@@ -104,19 +104,6 @@ typedef struct
 } DATA;
 
 /**
- * @brief This structure holds useful variables used when Spatial Averaging simulations are performed
- * See http://pubs.acs.org/doi/abs/10.1021/ct500529w
- */
-typedef struct
-{
-    uint32_t meps;  ///< Number of sets M_epsilon
-    uint32_t neps;  ///< Number of replicated structures N_epsilon
-    double weps;    ///< standards deviation of the gaussian distribution
-    double *normalNumbs;    ///< to avoid calling too often dSFMT, numbers are "cached" i.e. stored in an array ; see rand.c and rand.h
-    uint32_t normalSize;    ///< a counter to know how many random numbers from the normalNumbs array we have used
-} SPDAT;
-
-/**
  * @brief A structure holding the Lennard-Jones parameters
  * See http://www.sklogwiki.org/SklogWiki/index.php/Lennard-Jones_model
  */

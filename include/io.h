@@ -55,6 +55,6 @@ void write_xyz(ATOM at[], DATA *dat, uint64_t when, FILE *outf);
 void write_dcd(ATOM at[], DATA *dat, uint64_t when);
 
 // BUG : restart file 
-void write_rst(ATOM at[], DATA *dat, SPDAT *spdat, uint32_t meth);
+// void write_rst(ATOM at[], DATA *dat, uint32_t meth);
 
 #endif // IO_H_INCLUDED

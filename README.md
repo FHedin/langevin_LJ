@@ -1,15 +1,8 @@
 ----------------------------------------------
-# mc_LJ
+# langevin_LJ
 ----------------------------------------------
 
-C program for MC simulations applied to Lennard Jones clusters only.
-
-[![Build Status](https://travis-ci.org/FHedin/mc_LJ.svg)](https://travis-ci.org/FHedin/mc_LJ)
-
-<a href="https://scan.coverity.com/projects/4563">
-  <img alt="Coverity Scan Build Status"
-         src="https://scan.coverity.com/projects/4563/badge.svg"/>
-</a>
+C program for Langevin MD simulations applied to Lennard Jones clusters only.
 
 ----------------------------------------------
 ## COMPILE & INSTALL
@@ -63,7 +56,7 @@ For updating the documentation, run doxygen in the current directory (http://www
 ----------------------------------------------
 ## LICENSING (all files excepted subdirectory dSFMT)
 ----------------------------------------------
-Copyright (c) 2011-2015, Florent Hedin, Markus Meuwly, and the University of Basel.
+Copyright (c) 2011-2016, Florent Hedin, Markus Meuwly, and the University of Basel.
 All rights reserved.
 
 The 3-clause BSD license is applied to this software.

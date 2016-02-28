@@ -39,7 +39,7 @@ static uint32_t lj_size = 0 ;
  * @param spdat Common data for Spatial Averaging
  * @param at The atom list
  */
-void parse_from_file(char fname[], DATA *dat, SPDAT *spdat, ATOM **at)
+void parse_from_file(char fname[], DATA *dat, ATOM **at)
 {
     LJPARAMS *ljpars=NULL;
 
@@ -76,48 +76,23 @@ void parse_from_file(char fname[], DATA *dat, SPDAT *spdat, ATOM **at)
                 ///no extra parameter for Metropolis currently
                 if (!strcasecmp(buff3,"METROP"))
                     sprintf(dat->method,"%s",buff3);
-                ///for spatial averaging extra parameters are required
-                ///see literature for more details
-                else if (!strcasecmp(buff3,"SPAV"))
-                {
-                    char *weps=NULL , *meps=NULL , *neps=NULL;
-
-                    ///weps is the width of the gaussian distribution
-                    weps=strtok(NULL," \n\t");
-                    weps=strtok(NULL," \n\t");
-                    spdat->weps = atof(weps);
-
-                    ///meps is the number of sets
-                    meps=strtok(NULL," \n\t");
-                    meps=strtok(NULL," \n\t");
-                    spdat->meps = (uint32_t) atoi(meps);
-
-                    ///neps the number of replicated structures
-                    neps=strtok(NULL," \n\t");
-                    neps=strtok(NULL," \n\t");
-                    spdat->neps = (uint32_t) atoi(neps);
-
-                    sprintf(dat->method,"%s",buff3);
-                }
                 else
                 {
-                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be METROP or SPAV.\n",buff2,buff3);
+                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be METROP.\n",buff2,buff3);
                 }
             }
             ///get type of potential we plan to use
             else if (!strcasecmp(buff2,"POTENTIAL"))
             {
-                ///available : hard coded LJ potential, hard coded Aziz potential, and user defined potential read from LUA script
-                if (strcasecmp(buff3,"LJ") && strcasecmp(buff3,"AZIZ") && strcasecmp(buff3,"PLUGIN"))
+                ///available : hard coded LJ potential, and user defined potential read from LUA script
+                if (strcasecmp(buff3,"LJ") && strcasecmp(buff3,"PLUGIN"))
                 {
-                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be LJ or AZIZ or PLUGIN.\n",buff2,buff3);
+                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be LJ or PLUGIN.\n",buff2,buff3);
                 }
                 else
                 {
                     ///the user of pointers to functions avoids the use of if(...) in energy functions so code is faster
-                    if (!strcasecmp(buff3,"AZIZ"))
-                        get_ENER = &(get_AZIZ_V);
-                    else if (!strcasecmp(buff3,"LJ"))
+                    if (!strcasecmp(buff3,"LJ"))
                     {
                         get_ENER = &(get_LJ_V);
                         get_DV = &(get_LJ_DV);

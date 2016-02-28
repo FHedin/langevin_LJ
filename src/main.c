@@ -32,7 +32,6 @@
 
 #include "global.h"
 #include "MCclassic.h"
-#include "MCspav.h"
 #include "tools.h"
 #include "rand.h"
 #include "ener.h"
@@ -95,7 +94,6 @@ LUA_PLUGIN_TYPE lua_plugin_type = PAIR;
 
 //prototypes of functions written in this main.c
 void start_classic(DATA *dat, ATOM at[]);
-void start_spav(DATA *dat, SPDAT *spdat, ATOM at[]);
 void help(char **argv);
 void getValuesFromDB(DATA *dat);
 
@@ -125,7 +123,6 @@ int main(int argc, char** argv)
     char inpf[FILENAME_MAX] = "";
 
     DATA dat ;
-    SPDAT spdat = {5,5,0.5,NULL,0};
     ATOM *at = NULL;
 
     // function pointers for energy and gradient, and trajectory
@@ -251,7 +248,7 @@ int main(int argc, char** argv)
 #endif
     
     // parse input file, initialise atom list
-    parse_from_file(inpf,&dat,&spdat,&at);
+    parse_from_file(inpf,&dat,&at);
 
     // set the pointer to the default V and dV functions
     if(get_ENER==NULL)
@@ -275,8 +272,6 @@ int main(int argc, char** argv)
 
     if (get_ENER==&(get_LJ_V))
         fprintf(stdout,"Using L-J potential\n");
-    else if (get_ENER==&(get_AZIZ_V))
-        fprintf(stdout,"Using Aziz potential\n");
 #ifdef LUA_PLUGINS
     else if (get_ENER==&(get_lua_V))
         fprintf(stdout,"Using plugin pair potential\n");
@@ -320,10 +315,6 @@ int main(int argc, char** argv)
     if (strcasecmp(dat.method,"metrop")==0)
     {
         start_classic(&dat,at);
-    }
-    else if (strcasecmp(dat.method,"spav")==0)
-    {
-        start_spav(&dat,&spdat,at);
     }
     else
     {
@@ -411,68 +402,6 @@ void start_classic(DATA *dat, ATOM at[])
     fclose(crdfile);
     fclose(traj);
     fclose(efile);
-}
-
-// -----------------------------------------------------------------------------------------
-/**
- * \brief   This function starts a Spatial Averaging Monte Carlo  (SA-MC) simulation.
- *
- * \details This function is first in charge of opening all the output (coordinates, trajectory and energy) files.\n
- *          Then the function \b #launch_SPAV starting the simulation is called.\n
- *          In the end it prints results, close the files and goes back to the function \b #main.
- *
- * \param   dat is a structure containing control parameters common to all simulations.
- * \param   spdat is a structure containing control parameters dedicated to Spatial Averaging simulations.
- * \param   at[] is an array of structures ATOM containing coordinates and other variables.
- */
-void start_spav(DATA *dat, SPDAT *spdat, ATOM at[])
-{
-    fprintf(stdout,"SPAV parameters are :\n");
-    fprintf(stdout,"W_EPSILON = %lf\nM_EPSILON = %d\nN_EPSILON = %d\n\n",spdat->weps,spdat->meps,spdat->neps);
-
-    // rand numbers related stuff
-    spdat->normalSize=2048;
-    spdat->normalNumbs=malloc(spdat->normalSize*sizeof spdat->normalNumbs);
-
-    double ener = 0.0 ;
-    uint64_t acc=0;
-    
-    alloc_SAMC(spdat);
-
-    //open files
-    crdfile=fopen(io.crdtitle_first,"wt");
-    efile=fopen(io.etitle,"wb");
-    traj=fopen(io.trajtitle,"wb");
-
-    //write ini crds
-    write_xyz(at,dat,0,crdfile);
-    fclose(crdfile);
-
-    //get E of whole system
-    ener = (*get_ENER)(at,dat,-1);
-
-    fprintf(stdout,"\nStarting SPAV\n");
-    fprintf(stdout,"LJ initial energy is : %lf \n\n",ener);
-
-    //run sp avg simulation
-    acc=launch_SPAV(at,dat,spdat,&ener);
-
-    fprintf(stdout,"LJ final energy is : %lf\n",ener);
-    fprintf(stdout,"Acceptance ratio is %lf %% \n",100.0*(double)acc/(double)dat->nsteps);
-    fprintf(stdout,"final dmax = %lf\n",dat->d_max);
-    fprintf(stdout,"End of SPAV\n\n");
-
-    //write final crds
-    crdfile=fopen(io.crdtitle_last,"wt");
-    write_xyz(at,dat,dat->nsteps,crdfile);
-
-    dealloc_SAMC(spdat);
-
-    fclose(crdfile);
-    fclose(traj);
-    fclose(efile);
-
-    free(spdat->normalNumbs);
 }
 
 // -----------------------------------------------------------------------------------------

@@ -48,6 +48,8 @@ extern LUA_PLUGIN_TYPE lua_plugin_type;
 #define LUA_FUNCTIONS_NAMELEN   256
 #endif
 
+#include "global.h"
+
 void init_lua(char *plugin_file_name);
 void register_lua_function(char *plugin_function_name, LUA_FUNCTION_TYPE type);
 void end_lua();

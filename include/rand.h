@@ -20,9 +20,9 @@
 double get_next(DATA *dat);
 
 /// get a normally distributed random number
-double get_BoxMuller(DATA *dat, SPDAT *spdat);
+// double get_BoxMuller(DATA *dat);
 
 /// if we want to test the random numbers generators
-void test_norm_distrib(DATA *dat, SPDAT *spdat, uint32_t n);
+// void test_norm_distrib(DATA *dat, uint32_t n);
 
 #endif // RAND_H_INCLUDED

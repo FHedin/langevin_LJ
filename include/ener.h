@@ -41,14 +41,6 @@ void   (*get_DV)(ATOM at[], DATA *dat, double fx[], double fy[], double fz[]);
 double get_LJ_V(ATOM at[], DATA *dat, int32_t candidate);
 void get_LJ_DV(ATOM at[], DATA *dat, double fx[], double fy[], double fz[]);
 
-// ener for aziz potential
-double get_AZIZ_V(ATOM at[], DATA *dat, int32_t candidate);
-
-// those 3 functions returns energy in cm-1 !!
-double aziz_ne_ne(double r);
-double aziz_ar_ne(double r);
-double aziz_ar_ar(double r);
-
 // constraint for avoiding cluster evaporation
 double getExtraPot(double d2, double sig, double eps);
 

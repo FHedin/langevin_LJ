@@ -12,7 +12,9 @@ if (NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif (NOT CMAKE_BUILD_TYPE)
 
-set(TGT "mc_LJ" CACHE STRING "The executable name.")
+set(TGT "langevin_LJ" CACHE STRING "The executable name.")
+
+set(USE_LUA "ON" CACHE STRING "Enable LUA scripting capability")
 
 project(${TGT} C)
 
@@ -41,7 +43,6 @@ src/io.c
 src/logger.c
 src/main.c
 src/MCclassic.c
-src/MCspav.c
 src/memory.c
 src/minim.c
 src/parsing.c
@@ -53,7 +54,7 @@ dSFMT/dSFMT.c
 
 # never remove -DHAVE_SSE2 -DDSFMT_MEXP=19937 as they are necessary for the dSFMT random numbers generator
 add_definitions(-DHAVE_SSE2 -DDSFMT_MEXP=19937)
-# if you want to siable dSFMT and use the standard C random numbers (NOT RECOMMENDED), comment previous line and uncomment the following :
+# if you want to disable dSFMT and use the standard C random numbers (NOT RECOMMENDED), comment previous line and uncomment the following :
 #add_definitions(-DSTDRAND)
 
 if (USE_LUA)
