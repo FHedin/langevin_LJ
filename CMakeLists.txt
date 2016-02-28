@@ -1,7 +1,7 @@
-# Copyright (c) 2016, Florent Hedin, Markus Meuwly, and the University of Basel
-# All rights reserved.
-# The 3-clause BSD license is applied to this software.
-# see LICENSE.txt
+# Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel.
+#All rights reserved.
+#The 3-clause BSD license is applied to this software.
+#See LICENSE.txt
 
 cmake_minimum_required (VERSION 2.6)
 

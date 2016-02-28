@@ -5,7 +5,7 @@
  *
  * \authors Florent Hédin
  *
- * \copyright Copyright (c) 2016, Florent Hedin.\n
+ * \copyright Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel. \n
  *            All rights reserved. \n
  *            The 3-clause BSD license is applied to this software. \n
  *            See LICENSE.txt
@@ -38,9 +38,9 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   OpenMM_Platform*        platform;
   OpenMM_Integrator*      lintegrator;
   
-  OpenMM_Vec3 a = {2.0,0.0,0.0};
-  OpenMM_Vec3 b = {0.0,2.0,0.0};
-  OpenMM_Vec3 c = {0.0,0.0,2.0};
+//   OpenMM_Vec3 a = {2.0,0.0,0.0};
+//   OpenMM_Vec3 b = {0.0,2.0,0.0};
+//   OpenMM_Vec3 c = {0.0,0.0,2.0};
   
   /* Load all available OpenMM plugins from their default location. */
   pluginList = OpenMM_Platform_loadPluginsFromDirectory(
