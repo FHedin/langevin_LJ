@@ -93,7 +93,7 @@ void build_cluster(ATOM at[], DATA *dat, uint32_t from, uint32_t to, int32_t mod
     {
         double randvec[3] = {0.0} ;
 
-        dat->inid = dat->natom/4.0;
+        dat->inid = dat->natom/4.5;
 
         for (i=from; i<to; i++)
         {
@@ -105,7 +105,8 @@ void build_cluster(ATOM at[], DATA *dat, uint32_t from, uint32_t to, int32_t mod
                 at[i].y = dat->inid*randvec[1];
                 at[i].z = dat->inid*randvec[2];
             }
-            while( (X2(at[i].x)+X2(at[i].y)+X2(at[i].z))>X2(dat->inid) || no_conflict(at,i) != NO_CONFLICT );
+//             while( (X2(at[i].x)+X2(at[i].y)+X2(at[i].z))>X2(dat->inid) || no_conflict(at,i) != NO_CONFLICT );
+            while(  no_conflict(at,i) != NO_CONFLICT );
         }
     }
 }
@@ -130,7 +131,7 @@ int32_t  no_conflict(ATOM at[],uint32_t i)
     {
         d = X2(at[i].x-at[j].x) +  X2(at[i].y-at[j].y) + X2(at[i].z-at[j].z) ;
         d = sqrt(d);
-        if (d < ((at[i].pars.sig+at[j].pars.sig)/2.0))
+        if (d < ((at[i].pars.sig+at[j].pars.sig)/0.25))
         {
 //             fprintf(stderr,"[Info] Atoms %3d and %3d too close for starting configuration : generating new coordinates for atom %3d\n",j,i,i);
             LOG_PRINT(LOG_INFO,"Atoms %d and %d too close for starting configuration : generating new coordinates for atom %3d\n",j,i,i);

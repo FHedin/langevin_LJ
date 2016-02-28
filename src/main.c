@@ -332,40 +332,7 @@ void run_md(DATA *dat, ATOM at[])
   // END TODO
     
   terminate_omm(omm);
-  
-//     double ener = 0.0 ;
-//     uint64_t acc=0;
-// 
-//     //open required files
-//     crdfile=fopen(io.crdtitle_first,"wt");
-//     efile=fopen(io.etitle,"wb");
-//     traj=fopen(io.trajtitle,"wb");
-// 
-//     //write initial coordinates
-//     write_xyz(at,dat,0,crdfile);
-//     fclose(crdfile);
-// 
-//     //get initial energy of whole system
-//     ener = (*get_ENER)(at,dat,-1);
-//     fprintf(stdout,"\nStarting METROP Monte-Carlo\n");
-//     fprintf(stdout,"LJ initial energy is : %lf \n\n",ener);
-// 
-//     //CALL TO MAIN mc FUNCTION
-//     acc=make_MC_moves(at,dat,&ener);
-//     //simulation finished here
-//     
-//     fprintf(stdout,"\n\nLJ final energy is : %lf\n",ener);
-//     fprintf(stdout,"Acceptance ratio is %lf %% \n",100.0*(double)acc/(double)dat->nsteps);
-//     fprintf(stdout,"Final dmax = %lf\n",dat->d_max);
-//     fprintf(stdout,"End of METROP Monte-Carlo\n\n");
-// 
-//     //write last coordinates
-//     crdfile=fopen(io.crdtitle_last,"wt");
-//     write_xyz(at,dat,dat->nsteps,crdfile);
-//     
-//     fclose(crdfile);
-//     fclose(traj);
-//     fclose(efile);
+
 }
 
 // -----------------------------------------------------------------------------------------

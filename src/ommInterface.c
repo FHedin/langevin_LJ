@@ -57,7 +57,7 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   
   OpenMM_System_addForce(omm->system, (OpenMM_Force*)nonbond);
   
-  OpenMM_System_setDefaultPeriodicBoxVectors(omm->system,&a,&b,&c);
+//   OpenMM_System_setDefaultPeriodicBoxVectors(omm->system,&a,&b,&c);
 
   /* Specify the atoms and their properties:
   *  (1) System needs to know the masses.
@@ -116,7 +116,7 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   
   omm->context = OpenMM_Context_create(omm->system, omm->integrator);
   OpenMM_Context_setPositions(omm->context, initialPosInNm);
-  OpenMM_Context_setPeriodicBoxVectors(omm->context,&a,&b,&c);
+//   OpenMM_Context_setPeriodicBoxVectors(omm->context,&a,&b,&c);
 
   platform = OpenMM_Context_getPlatform(omm->context);
   omm->platformName = OpenMM_Platform_getName(platform);
@@ -154,7 +154,7 @@ void getState_omm(MyOpenMMData* omm, int wantEnergy,
   /* Forces are also available (and cheap). */
   
   /* State object is created here and must be explicitly destroyed below. */
-  state = OpenMM_Context_getState(omm->context, infoMask, 1);
+  state = OpenMM_Context_getState(omm->context, infoMask, 0);
   *timeInPs = OpenMM_State_getTime(state); /* OpenMM time is in ps already. */
 
   /* Positions are maintained as a Vec3Array inside the State. This will give
