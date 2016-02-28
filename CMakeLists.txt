@@ -14,7 +14,9 @@ endif (NOT CMAKE_BUILD_TYPE)
 
 set(TGT "langevin_LJ" CACHE STRING "The executable name.")
 
-set(USE_LUA "ON" CACHE STRING "Enable LUA scripting capability")
+set(USE_LUA "OFF" CACHE STRING "Enable LUA scripting capability")
+
+set(USE_OMM "ON" CACHE STRING "Enable use of the OpenMM librqry")
 
 project(${TGT} C)
 
@@ -35,6 +37,12 @@ include_directories(
 )
 endif()
 
+if (USE_OMM)
+include_directories(
+    /usr/local/openmm/include
+)
+endif()
+
 # list all source files
 set(
 SRCS
@@ -50,6 +58,7 @@ src/plugins_lua.c
 src/rand.c
 src/tools.c
 dSFMT/dSFMT.c
+src/ommInterface.c
 )
 
 # never remove -DHAVE_SSE2 -DDSFMT_MEXP=19937 as they are necessary for the dSFMT random numbers generator
@@ -68,6 +77,10 @@ if (USE_LUA)
     #link_directories(/usr/lib64)
 endif()
 
+if (USE_OMM)
+  link_directories(/usr/local/openmm/lib)
+endif()
+
 add_executable(${TGT} ${SRCS})
 
 if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
@@ -79,15 +92,19 @@ if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     #set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -march=native")
     #set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
-	# clang
-	target_link_libraries(${TGT} m)
+    # clang
+    target_link_libraries(${TGT} m)
 
-	if (USE_LUA)
+    if (USE_LUA)
         # clang with lua
         #target_link_libraries(${TGT} m lua-5.3)
-        
+
         # clang with luajit
         target_link_libraries(${TGT} m luajit-5.1)
+    endif()
+    
+    if (USE_OMM)
+        target_link_libraries(${TGT} m OpenMM)
     endif()
 
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
@@ -99,17 +116,21 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
     #set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -march=native")
     #set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
-	# gcc
-	target_link_libraries(${TGT} m)
+    # gcc
+    target_link_libraries(${TGT} m)
 
-	if (USE_LUA)
+    if (USE_LUA)
         # gcc with lua
         #target_link_libraries(${TGT} m lua)
         #target_link_libraries(${TGT} m lua-5.2)
         
         # gcc with luajit
         target_link_libraries(${TGT} m luajit-5.1)
-	endif()
+    endif()
+    
+    if (USE_OMM)
+        target_link_libraries(${TGT} m OpenMM)
+    endif()
 	
 elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "Intel")
     # when using intel compiler : optimise for modern intel cpus
@@ -131,6 +152,10 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "Intel")
         # icc with lua
         #target_link_libraries(${TGT} m lua)
         #target_link_libraries(${TGT} m lua-5.2)
+    endif()
+    
+    if (USE_OMM)
+        target_link_libraries(${TGT} m OpenMM)
     endif()
     
 endif()
