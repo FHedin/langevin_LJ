@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <math.h>
 
 #include "global.h"
 #include "io.h"
@@ -67,7 +68,7 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
         {
             buff3=strtok(NULL," \n\t");
 
-            ///to know which MC method we use
+            ///to know which MD method we use
             if (!strcasecmp(buff2,"METHOD"))
             {
                 if (!strcasecmp(buff3,"LANGEVIN"))
@@ -76,7 +77,8 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
                   sprintf(dat->method,"%s",buff3);
                 else
                 {
-                    LOG_PRINT(LOG_WARNING,"%s %s is unknown. Should be LANGEVIN or BROWNIAN.\n",buff2,buff3);
+                    LOG_PRINT(LOG_ERROR,"%s %s is unknown. Should be LANGEVIN or BROWNIAN.\n",buff2,buff3);
+                    exit(-1);
                 }
                 
                 char *friction=NULL , *tstep=NULL;
@@ -86,6 +88,35 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
                 tstep = strtok(NULL," \n\t");
                 dat->friction = atof(friction);
                 dat->timestep = atof(tstep);
+            }
+            /// get the nonbonded parameters
+            if (!strcasecmp(buff2,"NONBOND"))
+            {
+              // error if something else than nopbc given 
+              if (strcasecmp(buff3,"NOPBC"))
+              {
+                LOG_PRINT(LOG_ERROR,"%s is not a valid keyword for PBC. Should be NOPBC and nothing else with current code.\n",buff3);
+                exit(-1);
+              }
+              
+              char *cuton=NULL , *cutoff=NULL;
+              cuton = strtok(NULL," \n\t");
+              
+              // nocutoff desired
+              if (!strcasecmp(cuton,"NOCUT"))
+              {
+                dat->cuton  = INFINITY;
+                dat->cutoff = INFINITY;
+              }
+              else
+              {
+                cuton = strtok(NULL," \n\t");
+                cutoff = strtok(NULL," \n\t");
+                cutoff = strtok(NULL," \n\t");
+                dat->cuton = atof(cuton);
+                dat->cutoff = atof(cutoff);
+              }
+                
             }
             /// section where saving of energy, coordinates and trajectory is handled
             else if (!strcasecmp(buff2,"SAVE"))

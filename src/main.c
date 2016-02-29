@@ -235,20 +235,22 @@ int main(int argc, char** argv)
     fprintf(stdout,"nsteps   = %"PRIu64"\n",dat.nsteps);
     fprintf(stdout,"T        = %lf \n",dat.T);
     fprintf(stdout,"friction = %lf \n",dat.friction);
-    fprintf(stdout,"tstep    = %lf \n\n",dat.timestep);
-
+    fprintf(stdout,"tstep    = %lf \n",dat.timestep);
+    fprintf(stdout,"nb cuton    = %lf \n",dat.cuton);
+    fprintf(stdout,"nb cutoff   = %lf \n\n",dat.cutoff);
+    
     run_md(&dat,at);
 
-#ifdef __unix__
-    // compatible with some unixes-like OS: the struct rusage communicates with the kernel directly.
-    struct rusage infos_usage;
-    getrusage(RUSAGE_SELF,&infos_usage);
-    fprintf(stdout,"Maximum amount of memory used in kBytes is : %ld\n",infos_usage.ru_maxrss);
-    fprintf(stdout,"Execution time in Seconds : %lf\n",
-            (double)infos_usage.ru_utime.tv_sec+(double)infos_usage.ru_utime.tv_usec/1000000.0 +
-            (double)infos_usage.ru_stime.tv_sec+(double)infos_usage.ru_stime.tv_usec/1000000.0
-           );
-#endif
+// #ifdef __unix__
+//     // compatible with some unixes-like OS: the struct rusage communicates with the kernel directly.
+//     struct rusage infos_usage;
+//     getrusage(RUSAGE_SELF,&infos_usage);
+//     fprintf(stdout,"Maximum amount of memory used in kBytes is : %ld\n",infos_usage.ru_maxrss);
+//     fprintf(stdout,"Execution time in Seconds : %lf\n",
+//             (double)infos_usage.ru_utime.tv_sec+(double)infos_usage.ru_utime.tv_usec/1000000.0 +
+//             (double)infos_usage.ru_stime.tv_sec+(double)infos_usage.ru_stime.tv_usec/1000000.0
+//            );
+// #endif
     fprintf(stdout,"End of program\n");
 
     // free memory and exit properly
@@ -290,10 +292,12 @@ void run_md(DATA *dat, ATOM at[])
     dat->integrator = BROWNIAN;
   }
   
-  // initialise openMM code
+  // initialise openMM code : fastest platform (usually cuda) will be selected automatically
   MyOpenMMData* omm = init_omm(at,dat);
   
-  fprintf(stdout,"OpenMM initialised with platform : %s\n\n",omm->platformName);
+  fprintf(stdout,"OpenMM automatically initialised with fastest platform : %s\n\n",omm->platformName);
+  
+  infos_omm(omm);
   
   //open required files
   crdfile=fopen(io.crdtitle_first,"wt");
@@ -310,7 +314,7 @@ void run_md(DATA *dat, ATOM at[])
   
   // get initial energy
   getState_omm(omm,1,&time,&energy,at,dat);
-  fprintf(stdout,"time (ps) energy (kj/mol) : %lf\t%lf\n",time,energy);
+  fprintf(stdout,"time (ps) \t %lf \t energy (kj/mol) %lf\n",time,energy);
   
   uint64_t steps = 0;
   do
@@ -320,12 +324,12 @@ void run_md(DATA *dat, ATOM at[])
   
   //get time energy and coordinates
   getState_omm(omm,1,&time,&energy,at,dat);
-  fprintf(stdout,"time (ps) energy (kj/mol) : %lf\t%lf\n",time,energy);
-  
-  //write trajectory
-  write_traj(at,dat,0);
+  fprintf(stdout,"time (ps) \t %lf \t energy (kj/mol) %lf\n",time,energy);
   
   steps += io.trsave;
+  
+  //write trajectory
+  write_traj(at,dat,steps);
   
   }while(steps<dat->nsteps);
   

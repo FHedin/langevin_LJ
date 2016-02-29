@@ -53,9 +53,9 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   omm->system = OpenMM_System_create();
   nonbond     = OpenMM_NonbondedForce_create();
   OpenMM_NonbondedForce_setNonbondedMethod(nonbond,OpenMM_NonbondedForce_CutoffNonPeriodic);
-  OpenMM_NonbondedForce_setUseSwitchingFunction(nonbond,1);
-  OpenMM_NonbondedForce_setCutoffDistance(nonbond,1.2);
-  OpenMM_NonbondedForce_setSwitchingDistance(nonbond,1.0);
+  OpenMM_NonbondedForce_setUseSwitchingFunction(nonbond,OpenMM_True);
+  OpenMM_NonbondedForce_setSwitchingDistance(nonbond,dat->cuton);
+  OpenMM_NonbondedForce_setCutoffDistance(nonbond,dat->cutoff);
   
   OpenMM_System_addForce(omm->system, (OpenMM_Force*)nonbond);
   
@@ -116,8 +116,28 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   
   omm->integrator = lintegrator;
   
-  omm->context = OpenMM_Context_create(omm->system, omm->integrator);
+  int nplatforms = OpenMM_Platform_getNumPlatforms();
+  LOG_PRINT(LOG_INFO,"Number of OpenMM platforms detected : %d\n",nplatforms);
+  double best_speed=-1.0;
+  int best_platform=0;
+  for(int index=0;index<nplatforms;index++)
+  {
+    platform = OpenMM_Platform_getPlatform(index);
+    double lspeed = OpenMM_Platform_getSpeed(platform);
+    LOG_PRINT(LOG_INFO," Platform[%d] is : %s | speed is %lf \n",index,OpenMM_Platform_getName(platform),lspeed);
+    best_platform = (lspeed > best_speed)?index:best_platform;
+    best_speed = (lspeed > best_speed)?lspeed:best_speed;
+  }
+  
+  LOG_PRINT(LOG_INFO,"Will use Platform[%d], which is apparently the fastest\n",best_platform);
+  
+  platform = OpenMM_Platform_getPlatform(best_platform);
+  omm->context = OpenMM_Context_create_2(omm->system, omm->integrator, platform);
+  
+//   omm->context = OpenMM_Context_create(omm->system, omm->integrator);
+  
   OpenMM_Context_setPositions(omm->context, initialPosInNm);
+  
 //   OpenMM_Context_setPeriodicBoxVectors(omm->context,&a,&b,&c);
 
   platform = OpenMM_Context_getPlatform(omm->context);
@@ -179,6 +199,33 @@ void getState_omm(MyOpenMMData* omm, int wantEnergy,
     OpenMM_State_destroy(state);
   
 }
+
+// -----------------------------------------------------------------------------
+//             OpenMM print some information about current platform
+// -----------------------------------------------------------------------------
+void infos_omm(const MyOpenMMData* omm)
+{
+  
+  const OpenMM_Context* cont = omm->context;
+
+  LOG_PRINT(LOG_INFO,"OpenMM running on platform : %s\n",omm->platformName);
+
+  const OpenMM_Platform* platform = OpenMM_Context_getPlatform(cont);
+  
+  OpenMM_StringArray* platform_properties_names = OpenMM_Platform_getPropertyNames(platform);
+  int arraySize = OpenMM_StringArray_getSize(platform_properties_names);
+  
+  LOG_PRINT(LOG_INFO,"Dump of propeties and their values for platform  %s :\n",omm->platformName);
+  for(int index=0;index<arraySize;index++)
+  {
+    const char* propertyname = OpenMM_StringArray_get(platform_properties_names,index);
+    const char* propertyvalue = OpenMM_Platform_getPropertyValue(platform,cont,propertyname);
+    const char* propertydefault = OpenMM_Platform_getPropertyDefaultValue(platform,propertyname);
+    LOG_PRINT(LOG_INFO," Property : %s | Value : %s | Default : %s\n",propertyname,propertyvalue,propertydefault);
+  }
+  
+}
+
 
 // -----------------------------------------------------------------------------
 //                     DEALLOCATE OpenMM OBJECTS

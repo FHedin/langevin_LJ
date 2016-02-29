@@ -66,7 +66,7 @@ extern uint32_t is_stdout_redirected;
 
 /**
  * @brief This structure holds useful variables used across the simulations,
- * it is almost always transmitted from one function to another one .
+ * it is almost always passed by pointer from one function to another one .
  */
 typedef struct
 {
@@ -100,7 +100,7 @@ typedef struct
 {
     char sym[4];    ///< atomic symbol
     double mass;    ///< atomic mass
-    double charge;  ///< atomic charge ; unused
+    double charge;  ///< atomic charge ; unused in current code
     double sig ;    ///< L-J sigma parameter
     double eps ;    ///< L-J epsilon parameter
 } PARAMS;
@@ -110,9 +110,14 @@ typedef struct
  */
 typedef struct
 {
-    double x;   ///< X coordinate
-    double y;   ///< Y coordinate
-    double z;   ///< Z coordinate
+    /**
+    * @brief An union holding coordinates as both x,y,z an double[3]
+    */
+    union{
+    double x,y,z;   ///< X,Y,Z coordinates
+    double xyz[3]; ///< same xyz coordinates but as an array of size 3
+    };
+    
     char sym[4] ;   ///< atomic symbol
     PARAMS pars;   ///< substructure containing FF parameters
 } ATOM;

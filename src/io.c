@@ -74,7 +74,7 @@ void read_xyz(ATOM at[], DATA *dat, FILE *inpf)
  * Writes a CHARMM like dcd
  * @param at ATOM array where to store coordinates
  * @param dat common simulation data
- * @param when At which step function was called
+ * @param when At which step function was called ; unused here but kept for compatibility with write_xyz
  */
 void write_dcd(ATOM at[], DATA *dat, uint64_t when)
 {
@@ -90,7 +90,7 @@ void write_dcd(ATOM at[], DATA *dat, uint64_t when)
         uint32_t  ICNTRL[20]= {0};
         ICNTRL[0]=ICNTRL[3] = (uint32_t) dat->nsteps/io.trsave;
         ICNTRL[1]=ICNTRL[2]=1;
-        ICNTRL[19]=39;	//charmm version
+        ICNTRL[19]=39;	//charmm version : not important, we just put a not too old charmm version number
 
         uint32_t NTITLE=3;
         char TITLE[3][80]= {"","",""};
