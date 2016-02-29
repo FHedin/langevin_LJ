@@ -9,8 +9,8 @@
 METHOD LANGEVIN FRICTION 1.0 TIMESTEP 0.002
 
 # non-bonded parameters : no PBC for the moment, openMM cutoff-cuton implemented with switching method : in nm
-NONBOND NOPBC CUTON 1.0 CUTOFF 1.2
-# example if no cutoff required
+NONBOND NOPBC CUTON 1.2 CUTOFF 1.4
+# example if no cutoff required ; may be faster for small systems
 #NONBOND NOPBC NOCUT
 
 # the number of atoms
@@ -40,20 +40,20 @@ PARAMS    XE      MASS   131.2930  EPSILON  1.837394    SIGMA   0.4100
 # cuton cutoff were in nm but coordinates will be in angstroems
 
 #one type of atom, initial coordinates randomly generated within a volume of size sqrt(NATOMS)
-#ATOM    1   TO  END     AR   COOR    RANDOM
+ATOM    1   TO  END     AR   COOR    RANDOM
 
 #or coordinates read from an existing xyz file : pseudo-restart
 #ATOM    1   TO  END    AR   COOR    FILE   'last.xyz'
 
 # example of binary system with @ types of atoms : there is no limit to number of species anyway
 #  as long as they were all parametrized before in the params section
-ATOM    1   TO  13    KR   COOR    RANDOM
-ATOM    14  TO  END   AR   COOR    RANDOM
+#ATOM    1   TO  13    KR   COOR    RANDOM
+#ATOM    14  TO  END   AR   COOR    RANDOM
 
 # save initial and final coordinates to xyz files
-SAVE    COOR    FIRST   XYZ     'run1_init.xyz'
-SAVE    COOR    LAST    XYZ     'run1_last.xyz'
+SAVE    COOR    FIRST   XYZ     'run147ar_init.xyz'
+SAVE    COOR    LAST    XYZ     'run147ar_last.xyz'
 
 # regularly save the trajectory to a file (dcd is the only available type for the moment, anyway xyz takes far too much disk space and is slow to read)
-SAVE    COOR    TRAJ    DCD 'run1.dcd'  EACH    5000
+SAVE    COOR    TRAJ    DCD 'run147ar.dcd'  EACH    5000
 

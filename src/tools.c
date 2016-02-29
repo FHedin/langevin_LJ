@@ -105,7 +105,6 @@ void build_cluster(ATOM at[], DATA *dat, uint32_t from, uint32_t to, int32_t mod
                 at[i].y = dat->inid*randvec[1];
                 at[i].z = dat->inid*randvec[2];
             }
-//             while( (X2(at[i].x)+X2(at[i].y)+X2(at[i].z))>X2(dat->inid) || no_conflict(at,i) != NO_CONFLICT );
             while(  no_conflict(at,i) != NO_CONFLICT );
         }
     }
@@ -114,7 +113,7 @@ void build_cluster(ATOM at[], DATA *dat, uint32_t from, uint32_t to, int32_t mod
 
 /**
  * @brief Checks if an atom randomly placed is not far enough from the other ones.
- *          Positioning is valid if the distance is larger than their sigma_i_j LJ interaction term
+ *          Positioning is valid if the distance is larger than their sigma_i_j LJ interaction term multiplied by something
  * @param at Atom array
  * @param i Atomic index
  * @return NO_CONFLICT if no steric clash, CONFLICT otherwise

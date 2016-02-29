@@ -13,6 +13,7 @@
  */
 
 #include <stdlib.h>
+#include <math.h>
 
 #include "logger.h"
 #include "ommInterface.h"
@@ -53,9 +54,14 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   omm->system = OpenMM_System_create();
   nonbond     = OpenMM_NonbondedForce_create();
   OpenMM_NonbondedForce_setNonbondedMethod(nonbond,OpenMM_NonbondedForce_CutoffNonPeriodic);
-  OpenMM_NonbondedForce_setUseSwitchingFunction(nonbond,OpenMM_True);
-  OpenMM_NonbondedForce_setSwitchingDistance(nonbond,dat->cuton);
-  OpenMM_NonbondedForce_setCutoffDistance(nonbond,dat->cutoff);
+  
+  if(isfinite(dat->cuton) && isfinite(dat->cutoff) && (dat->cuton < dat->cutoff))
+  {
+    LOG_PRINT(LOG_INFO," User specified cuton = %lf and cutoff = %lf for openMM.\n",dat->cuton,dat->cutoff);
+    OpenMM_NonbondedForce_setUseSwitchingFunction(nonbond,OpenMM_True);
+    OpenMM_NonbondedForce_setSwitchingDistance(nonbond,dat->cuton);
+    OpenMM_NonbondedForce_setCutoffDistance(nonbond,dat->cutoff);
+  }
   
   OpenMM_System_addForce(omm->system, (OpenMM_Force*)nonbond);
   
