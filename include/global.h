@@ -110,14 +110,7 @@ typedef struct
  */
 typedef struct
 {
-    /**
-    * @brief An union holding coordinates as both x,y,z an double[3]
-    */
-    union{
     double x,y,z;   ///< X,Y,Z coordinates
-    double xyz[3]; ///< same xyz coordinates but as an array of size 3
-    };
-    
     char sym[4] ;   ///< atomic symbol
     PARAMS pars;   ///< substructure containing FF parameters
 } ATOM;

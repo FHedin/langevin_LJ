@@ -1,2 +1,5 @@
 /.directory
 
+/example
+*.kdev4
+/build

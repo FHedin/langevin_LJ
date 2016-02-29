@@ -14,18 +14,24 @@ NONBOND NOPBC CUTON 1.0 CUTOFF 1.2
 #NONBOND NOPBC NOCUT
 
 # the number of atoms
-NATOMS 146
+NATOMS 147
 
 # temperature in Kelvin
+#  for rare gases be sure to choose not too high, specially for lighter elements 
+#  otherwise the cluster just 'evaporates'
+#  see rare_gases.xls for melting and boiling temperatures of the rare gases
 TEMP   35
 
 # number of steps : coded as an unsigned 64-bits integer so > 2 billions allowed
 NSTEPS 25000000
 
 # For each type of atom, set the mass and Lennard Jones parameters
-# units: amu, kj/mol and nanometers
-PARAMS    AR      MASS    39.9480  EPSILON  1.045120    SIGMA   0.3345
-#PARAMS    NE      MASS    20.1797  EPSILON  0.310056    SIGMA   0.2782
+#  units: amu, kj/mol and nanometers
+#  see rare_gases.xls for some values
+PARAMS    NE      MASS    20.1797  EPSILON  0.304958    SIGMA   0.2790
+PARAMS    AR      MASS    39.9480  EPSILON  0.997680    SIGMA   0.3380
+PARAMS    KR      MASS    83.7980  EPSILON  1.421694    SIGMA   0.3600
+PARAMS    XE      MASS   131.2930  EPSILON  1.837394    SIGMA   0.4100
 
 #reduced units may also work although friction timestep and temparature should also use reduced units otherwise crash
 #PARAMS    AR      MASS    39.9480  EPSILON  1    SIGMA   1
@@ -34,14 +40,15 @@ PARAMS    AR      MASS    39.9480  EPSILON  1.045120    SIGMA   0.3345
 # cuton cutoff were in nm but coordinates will be in angstroems
 
 #one type of atom, initial coordinates randomly generated within a volume of size sqrt(NATOMS)
-ATOM    1   TO  END     AR   COOR    RANDOM
+#ATOM    1   TO  END     AR   COOR    RANDOM
 
 #or coordinates read from an existing xyz file : pseudo-restart
 #ATOM    1   TO  END    AR   COOR    FILE   'last.xyz'
 
 # example of binary system with @ types of atoms : there is no limit to number of species anyway
-#ATOM    1   TO  24    AR   COOR    RANDOM
-#ATOM    25  TO  END   NE   COOR    RANDOM
+#  as long as they were all parametrized before in the params section
+ATOM    1   TO  13    KR   COOR    RANDOM
+ATOM    14  TO  END   AR   COOR    RANDOM
 
 # save initial and final coordinates to xyz files
 SAVE    COOR    FIRST   XYZ     'run1_init.xyz'
