@@ -38,7 +38,7 @@ void write_xyz(ATOM at[], DATA *dat, uint64_t when, FILE *outf)
     recentre(at,dat);
 
     uint32_t i=0;
-    fprintf(outf,"%d\n#step %"PRIu64"\n",dat->natom,when);
+    fprintf(outf,"%d\n#step %"PRIu64"\ttime %lf (ps)\n",dat->natom,when,when*dat->timestep);
     for (i=0; i<(dat->natom); i++)
         fprintf(outf,"%s\t%10.5lf\t%10.5lf\t%10.5lf\n",at[i].sym,at[i].x,at[i].y,at[i].z);
 }

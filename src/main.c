@@ -332,7 +332,11 @@ void run_md(DATA *dat, ATOM at[])
   // END TODO
     
   terminate_omm(omm);
-
+  
+  crdfile=fopen(io.crdtitle_last,"wt");
+  //write lqst coordinates
+  write_xyz(at,dat,steps,crdfile);
+  fclose(crdfile);
 }
 
 // -----------------------------------------------------------------------------------------

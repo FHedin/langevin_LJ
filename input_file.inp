@@ -6,19 +6,24 @@
 # integration method to use : LANGEVIN or BROWNIAN
 # friction coefficicent in ps^-1
 # timestep in ps
-METHOD BROWNIAN FRICTION 1.0 TIMESTEP 0.002
+METHOD LANGEVIN FRICTION 1.0 TIMESTEP 0.002
 
-NATOMS 38
+# non-bonded parameters : no PBC for the moment, cutoff-cuton implemented with switching method
+NONBOND NOPBC CUTON 1.0 CUTOFF 1.2
+# example if no cutoff required
+#NONBOND NOPBC NOCUT
+
+NATOMS 75
 
 # temperature in Kelvin
-TEMP   5
+TEMP   15
 
 # number of steps : coded as an unsigned 64-bits integer
-NSTEPS 2500000
+NSTEPS 5000000
 
 # For each type of atom, set the mass and Lennard Jones parameters
 # units: amu, kj/mol and nanometers
-#PARAMS    AR      MASS    39.9480  EPSILON  1.045120    SIGMA   0.3345
+PARAMS    AR      MASS    39.9480  EPSILON  1.045120    SIGMA   0.3345
 PARAMS    NE      MASS    20.1797  EPSILON  0.310056    SIGMA   0.2782
 
 #reduced units
@@ -26,21 +31,21 @@ PARAMS    NE      MASS    20.1797  EPSILON  0.310056    SIGMA   0.2782
 
 # Build the atomic system
 #one type of atom, initial coordinates randomly generated
-ATOM    1   TO  END     NE   COOR    RANDOM
+#ATOM    1   TO  END     NE   COOR    RANDOM
 
 #or coordinates read from a xyz file
 #ATOM    1   TO  END    AR   COOR    FILE   'file.xyz'
 
 # example of binary system built by hand
-#ATOM    1   TO  30    AR   COOR    RANDOM
-#ATOM    31  TO  END   NE   COOR    RANDOM
+ATOM    1   TO  19    AR   COOR    RANDOM
+ATOM    20  TO  END   NE   COOR    RANDOM
 
 # save initial and final coordinates to xyz files
 SAVE    COOR    FIRST   XYZ     'init.xyz'
 SAVE    COOR    LAST    XYZ     'last.xyz'
 
 # regularly save the trajectory to a file (only dcd available for the moment)
-SAVE    COOR    TRAJ    DCD 'traj.dcd'  EACH    10000
+SAVE    COOR    TRAJ    DCD 'traj.dcd'  EACH    5000
 
 
 

@@ -80,6 +80,9 @@ typedef struct
     uint8_t integrator; ///< The type on integrator used : Langevin (0) or Brownian (1)
     double friction ;   ///< Friction for Langevin/Brownian integrator : in ps^-1
     double timestep;    ///< Timestep for Langevin/Brownian integrator : in ps
+    
+    double cuton;       ///< cuton value for non-bonded  interactions
+    double cutoff;      ///< cutoff value for non-bonded interactions
 
 #ifndef STDRAND
     dsfmt_t dsfmt;      ///< A structure used by the dSFMT random numbers generator

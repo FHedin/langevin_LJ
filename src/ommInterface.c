@@ -52,8 +52,10 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
     * System takes ownership of the force objects; don't delete them yourself. */
   omm->system = OpenMM_System_create();
   nonbond     = OpenMM_NonbondedForce_create();
-//   OpenMM_NonbondedForce_setNonbondedMethod(nonbond,OpenMM_NonbondedForce_CutoffPeriodic);
-//   OpenMM_NonbondedForce_setCutoffDistance(nonbond,0.8);
+  OpenMM_NonbondedForce_setNonbondedMethod(nonbond,OpenMM_NonbondedForce_CutoffNonPeriodic);
+  OpenMM_NonbondedForce_setUseSwitchingFunction(nonbond,1);
+  OpenMM_NonbondedForce_setCutoffDistance(nonbond,1.2);
+  OpenMM_NonbondedForce_setSwitchingDistance(nonbond,1.0);
   
   OpenMM_System_addForce(omm->system, (OpenMM_Force*)nonbond);
   
@@ -139,7 +141,7 @@ void doNsteps_omm(MyOpenMMData* omm, int numSteps)
  *                    COPY STATE BACK TO CPU FROM OPENMM
  * -------------------------------------------------------------------------- */
 void getState_omm(MyOpenMMData* omm, int wantEnergy, 
-                  double* timeInPs, double* energyInKcal,
+                  double* timeInPs, double* energyInKJ,
                   ATOM atoms[], DATA* dat)
 {
   OpenMM_State*           state;
@@ -168,10 +170,10 @@ void getState_omm(MyOpenMMData* omm, int wantEnergy,
     atoms[n].z = posInAng.z;
   }
 
-    /* If energy has been requested, obtain it and convert from kJ to kcal. */
-    *energyInKcal = 0;
+    /* If energy has been requested, obtain it and convert from kJ */
+    *energyInKJ = 0;
     if (wantEnergy) 
-        *energyInKcal = (   OpenMM_State_getPotentialEnergy(state) 
+        *energyInKJ = (   OpenMM_State_getPotentialEnergy(state) 
                           + OpenMM_State_getKineticEnergy(state));
 
     OpenMM_State_destroy(state);
