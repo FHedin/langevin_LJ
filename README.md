@@ -71,3 +71,16 @@ University. All rights reserved.
 
 See dSFMT/LICENSE_dSFMT.txt
 
+----------------------------------------------
+## OpenMM platform
+----------------------------------------------
+
+The software should automatically detect the fastest OpenMM Platform available on your computer (i.e. CUDA, OpenCL, ...)
+If not it will run with the slow Reference platform : it is most probably because the OpenMM directory with the 'plugins' library is not found.
+You may need to export the following OPENMM_PLUGIN_DIR environment variable to solve the problem : 
+
+For example for a custom installation in /home/$USER/bin/openmm.
+
+  * export OPENMM_PLUGIN_DIR=$HOME/bin/openmm/lib/plugins
+
+
