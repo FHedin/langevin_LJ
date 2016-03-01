@@ -1,9 +1,9 @@
 /**
  * \file main.c
  *
- * \brief C program for simulation of Lennard Jones clusters.
+ * \brief C program for MD simulation of Lennard Jones clusters.
  *
- * \authors Florent Hedin (University of Basel, Switzerland) \n
+ * \authors Florent Hédin (University of Basel, Switzerland) \n
  *          Markus Meuwly (University of Basel, Switzerland)
  *
  * \copyright Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel. \n
@@ -19,16 +19,6 @@
 #include <strings.h>
 #include <time.h>
 #include <math.h>
-
-// if parallel execution is implemented by using openMP
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-// for some unixes : usage info (total time, memory ...)
-#ifdef __unix__
-#include <sys/resource.h>
-#endif
 
 #include "global.h"
 #include "tools.h"
@@ -106,6 +96,7 @@ int main(int argc, char** argv)
     DATA dat ;
     ATOM *at = NULL;
 
+    // default trajectory mode is binary dcd
     write_traj= &(write_dcd);
 
     // arguments parsing
@@ -241,16 +232,6 @@ int main(int argc, char** argv)
     
     run_md(&dat,at);
 
-// #ifdef __unix__
-//     // compatible with some unixes-like OS: the struct rusage communicates with the kernel directly.
-//     struct rusage infos_usage;
-//     getrusage(RUSAGE_SELF,&infos_usage);
-//     fprintf(stdout,"Maximum amount of memory used in kBytes is : %ld\n",infos_usage.ru_maxrss);
-//     fprintf(stdout,"Execution time in Seconds : %lf\n",
-//             (double)infos_usage.ru_utime.tv_sec+(double)infos_usage.ru_utime.tv_usec/1000000.0 +
-//             (double)infos_usage.ru_stime.tv_sec+(double)infos_usage.ru_stime.tv_usec/1000000.0
-//            );
-// #endif
     fprintf(stdout,"End of program\n");
 
     // free memory and exit properly
@@ -267,11 +248,31 @@ int main(int argc, char** argv)
 }
 
 // -----------------------------------------------------------------------------------------
+/**
+ * \brief   This function simply prints a basic help message.
+ *
+ * \details If any of \b -h or \b -help or \b --help are provided on the command line this help message is printed.\n
+ *          If no command line parameter is present this message is also printed.\n
+ *          If an unknown command line parameter is present this message is also printed.
+ *
+ * \param   argv Simply the same array of command line parameters, from function \b #main.
+ */
+void help(char **argv)
+{
+  fprintf(stdout,"Need at least one argument : %s -i an_input_file\n",argv[0]);
+  fprintf(stdout,"optional args : -seed [a_rnd_seed] -o [output_file] -log [logging level, one of { no | err | warn | info | dbg }] \n");
+  fprintf(stdout,"Example : \n %s -i input_file -seed 1330445520 -o out.txt -log info \n\n",argv[0]);
+  fprintf(stdout,"The default logging level is 'warn' \n");
+}
+
+// -----------------------------------------------------------------------------------------
+// OPEN MM data structures and code only included after this point : more modularity
+// -----------------------------------------------------------------------------------------
 
 #include "ommInterface.h"
 
 /**
- * \brief   This function starts a Langevin or Brownian MD simulation
+ * \brief   This function starts a Langevin or Brownian MD simulation using OpenMM
  *
  * \details This function is first in charge of opening all the output (coordinates, trajectory and energy) files.\n
  *          Then it runs the MD using openMM code.\n
@@ -282,6 +283,9 @@ int main(int argc, char** argv)
  */
 void run_md(DATA *dat, ATOM at[])
 {
+  
+  LOG_PRINT(LOG_INFO,"Forcing energy save frequency to be the same than trajectory save frequency.");
+  io.esave = (io.esave == io.trsave) ? io.esave : io.trsave;
   
   if(!strcasecmp(dat->method,"LANGEVIN"))
   {
@@ -297,14 +301,15 @@ void run_md(DATA *dat, ATOM at[])
   
   fprintf(stdout,"OpenMM automatically initialised with fastest platform : %s\n\n",omm->platformName);
   
+  // print to info log file more infos concerning platform selected
   infos_omm(omm);
   
-  //open required files
+  //open required output files
   crdfile=fopen(io.crdtitle_first,"wt");
   efile=fopen(io.etitle,"wb");
   traj=fopen(io.trajtitle,"wb");
 
-  //write initial coordinates
+  //write initial coordinates at step 0
   write_xyz(at,dat,0,crdfile);
   fclose(crdfile);
   
@@ -315,6 +320,8 @@ void run_md(DATA *dat, ATOM at[])
   // get initial energy
   getState_omm(omm,1,&time,&energy,at,dat);
   fprintf(stdout,"time (ps) \t %lf \t energy (kj/mol) %lf\n",time,energy);
+  
+
   
   uint64_t steps = 0;
   do
@@ -331,7 +338,10 @@ void run_md(DATA *dat, ATOM at[])
   //write trajectory
   write_traj(at,dat,steps);
   
-  }while(steps<dat->nsteps);
+  //write energy
+  fwrite(&energy,sizeof(double),1,efile);
+  
+  }while(steps < dat->nsteps);
   
   // END TODO
     
@@ -341,22 +351,4 @@ void run_md(DATA *dat, ATOM at[])
   //write lqst coordinates
   write_xyz(at,dat,steps,crdfile);
   fclose(crdfile);
-}
-
-// -----------------------------------------------------------------------------------------
-/**
- * \brief   This function simply prints a basic help message.
- *
- * \details If any of \b -h or \b -help or \b --help are provided on the command line this help message is printed.\n
- *          If no command line parameter is present this message is also printed.\n
- *          If an unknown command line parameter is present this message is also printed.
- *
- * \param   argv Simply the same array of command line parameters, from function \b #main.
- */
-void help(char **argv)
-{
-    fprintf(stdout,"Need at least one argument : %s -i an_input_file\n",argv[0]);
-    fprintf(stdout,"optional args : -seed [a_rnd_seed] -o [output_file] -log [logging level, one of { no | err | warn | info | dbg }] \n");
-    fprintf(stdout,"Example : \n %s -i input_file -seed 1330445520 -o out.txt -log info \n\n",argv[0]);
-    fprintf(stdout,"The default logging level is 'warn' \n");
 }

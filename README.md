@@ -47,12 +47,12 @@ For specifying another compiler on linux (for example clang or Intel icc):
 ----------------------------------------------
 Check the doc directory that contains programming documentation.
 
-For updating the documentation, run doxygen in the current directory (http://www.doxygen.org)
+For generating the documentation, run doxygen in the current directory (http://www.doxygen.org)
 
 ----------------------------------------------
 ## LICENSING (all files excepted subdirectory dSFMT)
 ----------------------------------------------
-Copyright (c) 2011-2016, Florent Hedin, Markus Meuwly, and the University of Basel.
+Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel.
 All rights reserved.
 
 The 3-clause BSD license is applied to this software.

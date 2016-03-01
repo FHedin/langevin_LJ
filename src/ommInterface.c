@@ -3,7 +3,8 @@
  *
  * \brief Functions for interfacing this code with the openMM library
  *
- * \authors Florent Hédin
+ * \authors Florent Hédin (University of Basel, Switzerland) \n
+ *          Markus Meuwly (University of Basel, Switzerland)
  *
  * \copyright Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel. \n
  *            All rights reserved. \n

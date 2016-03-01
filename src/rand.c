@@ -6,7 +6,7 @@
  *        If not by default the dSFMT generator is used (high quality, HIGHLY RECOMMENDED)
  *        Code for dSFMT is included in a subdirectory (unmodified, please avoid modifying excepted if you really know what you do as you may induce a severe bias)
  *
- * \authors Florent Hedin (University of Basel, Switzerland) \n
+ * \authors Florent Hédin (University of Basel, Switzerland) \n
  *          Markus Meuwly (University of Basel, Switzerland)
  *
  * \copyright Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel. \n
