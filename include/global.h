@@ -106,16 +106,6 @@ typedef struct
 } PARAMS;
 
 /**
- * @brief A structure representing an atom
- */
-typedef struct
-{
-    double x,y,z;   ///< X,Y,Z coordinates
-    char sym[4] ;   ///< atomic symbol
-    PARAMS pars;   ///< substructure containing FF parameters
-} ATOM;
-
-/**
  * @brief A structure representing the center of mass of a system, simply a point in
  * a 3-Dim space
  */
@@ -123,5 +113,23 @@ typedef struct
 {
     double cx,cy,cz;
 } CM;
+
+// #include <OpenMMCWrapper.h>
+/**
+ * @brief A structure representing an atom
+ */
+typedef struct
+{
+    /// trick for openMM : anonymous union for either accesing coordinates atomically or directly as a set of 3
+//     union
+//     {
+      double x,y,z;   ///< X,Y,Z coordinates
+//       OpenMM_Vec3 xyz;
+//     };
+    char sym[4] ;   ///< atomic symbol
+    PARAMS pars;   ///< substructure containing FF parameters
+} ATOM;
+
+
 
 #endif // GLOBAL_H_INCLUDED

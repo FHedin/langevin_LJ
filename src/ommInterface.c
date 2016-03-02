@@ -40,10 +40,6 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   OpenMM_Platform*        platform;
   OpenMM_Integrator*      lintegrator;
   
-//   OpenMM_Vec3 a = {2.0,0.0,0.0};
-//   OpenMM_Vec3 b = {0.0,2.0,0.0};
-//   OpenMM_Vec3 c = {0.0,0.0,2.0};
-  
   /* Load all available OpenMM plugins from their default location. */
   pluginList = OpenMM_Platform_loadPluginsFromDirectory(
       OpenMM_Platform_getDefaultPluginsDirectory());
@@ -195,6 +191,7 @@ void getState_omm(MyOpenMMData* omm, int wantEnergy,
     atoms[n].x = posInAng.x;
     atoms[n].y = posInAng.y;
     atoms[n].z = posInAng.z;
+//     atoms[n].xyz = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
   }
 
     /* If energy has been requested, obtain it and convert from kJ */

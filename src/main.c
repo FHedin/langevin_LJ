@@ -295,7 +295,7 @@ void run_md(DATA *dat, ATOM at[])
   {
     dat->integrator = BROWNIAN;
   }
-  
+
   // initialise openMM code : fastest platform (usually cuda) will be selected automatically
   MyOpenMMData* omm = init_omm(at,dat);
   
