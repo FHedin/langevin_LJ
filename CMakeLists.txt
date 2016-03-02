@@ -62,8 +62,8 @@ if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
 #     set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
     # clang compiler : optimise for current machine
-    set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g -march=native")
-    set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
+    set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g -march=native")
+    set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
     # clang
     target_link_libraries(${TGT} m)
@@ -78,8 +78,8 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
 #     set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
     # gnu compiler : optimise for current machine
-    set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g -march=native")
-    set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
+    set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g -march=native")
+    set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
     # gcc
     target_link_libraries(${TGT} m)
@@ -94,8 +94,8 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "Intel")
 #     set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -ax,CORE-AVX2,CORE-AVX-I,AVX,SSE4.2,SSE4.1,SSSE3,SSE3 -fno-strict-aliasing -O0 -g")
 
     # when using intel compiler : optimise for current machine
-    set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -fno-strict-aliasing -O3 -g -xHost")
-    set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -fno-strict-aliasing -O0 -g")
+    set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -fno-strict-aliasing -O3 -g -xHost")
+    set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -fno-strict-aliasing -O0 -g")
     
     # icc
     target_link_libraries(${TGT} m)

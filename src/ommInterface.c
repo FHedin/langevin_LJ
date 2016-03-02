@@ -187,11 +187,11 @@ void getState_omm(MyOpenMMData* omm, int wantEnergy,
   posArrayInNm = OpenMM_State_getPositions(state);
   for (uint32_t n=0; n < dat->natom; n++)
   {
-    OpenMM_Vec3 posInAng = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
-    atoms[n].x = posInAng.x;
-    atoms[n].y = posInAng.y;
-    atoms[n].z = posInAng.z;
-//     atoms[n].xyz = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
+//     OpenMM_Vec3 posInAng = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
+//     atoms[n].x = posInAng.x;
+//     atoms[n].y = posInAng.y;
+//     atoms[n].z = posInAng.z;
+    atoms[n].xyz = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
   }
 
     /* If energy has been requested, obtain it and convert from kJ */
