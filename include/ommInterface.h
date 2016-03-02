@@ -37,7 +37,7 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat);
 void doNsteps_omm(MyOpenMMData* omm, int numSteps);
 
 void getState_omm(MyOpenMMData* omm, int wantEnergy, 
-                  double* timeInPs, double* energyInKcal,
+                  double* timeInPs, ENERGIES* energies, double* currentTemperature,
                   ATOM atoms[], DATA* dat);
 
 void infos_omm(const MyOpenMMData* omm);

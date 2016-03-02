@@ -78,8 +78,8 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
 #     set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
     # gnu compiler : optimise for current machine
-    set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g -march=native")
-    set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
+    set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -pedantic -msse2 -fno-strict-aliasing -O3 -g -march=native")
+    set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -pedantic -msse2 -fno-strict-aliasing -O0 -g")
 
     # gcc
     target_link_libraries(${TGT} m)

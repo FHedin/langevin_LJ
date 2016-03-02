@@ -70,26 +70,26 @@ extern uint32_t is_stdout_redirected;
  */
 typedef struct
 {
-    uint32_t natom ;    ///< Number of atoms
-    char method[32];    ///< MC Method string : 'METROP' or 'SPAV' (case insensitive)
-    uint64_t nsteps ;   ///< Number of steps as a 64 bits integer to allow really long simulations (i.e. more than 2 billions)
+  uint32_t natom ;    ///< Number of atoms
+  char method[32];    ///< MC Method string : 'METROP' or 'SPAV' (case insensitive)
+  uint64_t nsteps ;   ///< Number of steps as a 64 bits integer to allow really long simulations (i.e. more than 2 billions)
 
-    double inid ;       ///< An initial distance term used when randomly assigning coordinates to atoms when generating a cluster
-    
-    double T ;          ///< Temperature : in Kelvin
-    uint8_t integrator; ///< The type on integrator used : Langevin (0) or Brownian (1)
-    double friction ;   ///< Friction for Langevin/Brownian integrator : in ps^-1
-    double timestep;    ///< Timestep for Langevin/Brownian integrator : in ps
-    
-    double cuton;       ///< cuton value for non-bonded  interactions
-    double cutoff;      ///< cutoff value for non-bonded interactions
+  double inid ;       ///< An initial distance term used when randomly assigning coordinates to atoms when generating a cluster
+  
+  double T ;          ///< Temperature : in Kelvin
+  uint8_t integrator; ///< The type on integrator used : Langevin (0) or Brownian (1)
+  double friction ;   ///< Friction for Langevin/Brownian integrator : in ps^-1
+  double timestep;    ///< Timestep for Langevin/Brownian integrator : in ps
+  
+  double cuton;       ///< cuton value for non-bonded  interactions
+  double cutoff;      ///< cutoff value for non-bonded interactions
 
 #ifndef STDRAND
-    dsfmt_t dsfmt;      ///< A structure used by the dSFMT random numbers generator
-    uint32_t *seeds;    ///< An array of seeds used for intialising the dSFMT random numbers generator
+  dsfmt_t dsfmt;      ///< A structure used by the dSFMT random numbers generator
+  uint32_t *seeds;    ///< An array of seeds used for intialising the dSFMT random numbers generator
 #endif
-    uint32_t nrn ;      ///< a counter to know how many random numbers from the rn array we have used
-    double *rn ;        ///< to avoid calling too often dSFMT, numbers are "cached" i.e. stored in an array ; see rand.c and rand.h
+  uint32_t nrn ;      ///< a counter to know how many random numbers from the rn array we have used
+  double *rn ;        ///< to avoid calling too often dSFMT, numbers are "cached" i.e. stored in an array ; see rand.c and rand.h
 } DATA;
 
 /**
@@ -98,11 +98,11 @@ typedef struct
  */
 typedef struct
 {
-    char sym[4];    ///< atomic symbol
-    double mass;    ///< atomic mass
-    double charge;  ///< atomic charge ; unused in current code
-    double sig ;    ///< L-J sigma parameter
-    double eps ;    ///< L-J epsilon parameter
+  char sym[4];    ///< atomic symbol
+  double mass;    ///< atomic mass
+  double charge;  ///< atomic charge ; unused in current code
+  double sig ;    ///< L-J sigma parameter
+  double eps ;    ///< L-J epsilon parameter
 } PARAMS;
 
 /**
@@ -111,25 +111,35 @@ typedef struct
  */
 typedef struct
 {
-    double cx,cy,cz;
+  double cx,cy,cz;
 } CM;
 
-#include <OpenMMCWrapper.h>
 /**
  * @brief A structure representing an atom
  */
 typedef struct
 {
-    /// trick for openMM : anonymous union for either accesing coordinates atomically or directly as a set of 3
-    union
-    {
-      double x,y,z;   ///< X,Y,Z coordinates
-      OpenMM_Vec3 xyz;
-    };
-    char sym[4] ;   ///< atomic symbol
-    PARAMS pars;   ///< substructure containing FF parameters
+  /// trick for openMM : anonymous union for either accesing coordinates atomically or directly as a structure
+  union
+  {
+    struct {double x,y,z;};         ///< X,Y,Z coordinates in anonympus struct so accessible atomically
+    struct {double x,y,z;}xyz;      ///< X,Y,Z coordinates but wrapped as a named structure : for mapping it later to OpenMM Vec3 type
+  };
+  char sym[4] ;   ///< atomic symbol
+  PARAMS pars;   ///< substructure containing FF parameters
 } ATOM;
 
-
+/**
+ * @brief A structure holding energy terms at a curent step
+ * Using anonympus struct and unions the energy can be accessed either by term of as an array
+ */
+typedef struct
+{
+  union
+  {
+    struct {double epot,ekin,etot;};
+    double ene[3];
+  };
+} ENERGIES;
 
 #endif // GLOBAL_H_INCLUDED

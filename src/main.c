@@ -284,7 +284,7 @@ void help(char **argv)
 void run_md(DATA *dat, ATOM at[])
 {
   
-  LOG_PRINT(LOG_INFO,"Forcing energy save frequency to be the same than trajectory save frequency.");
+  LOG_PRINT(LOG_INFO,"Forcing energy save frequency to be the same than trajectory save frequency.\n");
   io.esave = (io.esave == io.trsave) ? io.esave : io.trsave;
   
   if(!strcasecmp(dat->method,"LANGEVIN"))
@@ -314,33 +314,59 @@ void run_md(DATA *dat, ATOM at[])
   fclose(crdfile);
   
   // TODO : code calling openMM for performing MD
-  double time;
-  double energy;
+  
+  // current simulation time
+  double time = 0.;
+  // current Temperature (should not vary)
+  double currentT = dat->T;
+  
+  // energies stored in a data structure
+  ENERGIES eners;
+  
+  const double minimTol = 10;
+  const int minimSteps = 0;
+  
+  //write at beginning of energy file the number of steps
+  uint64_t saved = dat->nsteps/io.trsave + 1 ;
+  fwrite(&(saved),sizeof(uint64_t),1,efile);
+  
+  // do minimisation
+  OpenMM_LocalEnergyMinimizer_minimize(omm->context,minimTol,minimSteps);
   
   // get initial energy
-  getState_omm(omm,1,&time,&energy,at,dat);
-  fprintf(stdout,"time (ps) \t %lf \t energy (kj/mol) %lf\n",time,energy);
+  getState_omm(omm,1,&time,&eners,&currentT,at,dat);
+  fprintf(stdout,"time (ps) \t %lf \t ekin (kj/mol) \t %lf \t epot (kj/mol) \t %lf \t etot (kj/mol) \t %lf \t Temperature (K) \t %lf\n",time,eners.ekin,eners.epot,eners.etot,currentT);
   
-
+  //write time and energy terms
+  fwrite(&time,sizeof(double),1,efile);
+  fwrite(&(eners.epot),sizeof(double),1,efile);
+  fwrite(&(eners.ekin),sizeof(double),1,efile);
+  fwrite(&(eners.etot),sizeof(double),1,efile);
   
   uint64_t steps = 0;
   do
   {
-  // do some steps
-  doNsteps_omm(omm,io.trsave);
-  
-  //get time energy and coordinates
-  getState_omm(omm,1,&time,&energy,at,dat);
-  fprintf(stdout,"time (ps) \t %lf \t energy (kj/mol) %lf\n",time,energy);
-  
-  steps += io.trsave;
-  
-  //write trajectory
-  write_traj(at,dat,steps);
-  
-  //write energy
-  fwrite(&energy,sizeof(double),1,efile);
-  
+    // do some steps
+    doNsteps_omm(omm,io.trsave);
+    
+    // do minimisation
+    OpenMM_LocalEnergyMinimizer_minimize(omm->context,minimTol,minimSteps);
+    
+    //get time energy and coordinates
+    getState_omm(omm,1,&time,&eners,&currentT,at,dat);
+    fprintf(stdout,"time (ps) \t %lf \t ekin (kj/mol) \t %lf \t epot (kj/mol) \t %lf \t etot (kj/mol) \t %lf \t Temperature (K) \t %lf\n",time,eners.ekin,eners.epot,eners.etot,currentT);
+    
+    steps += io.trsave;
+    
+    //write trajectory
+    write_traj(at,dat,steps);
+    
+    //write time and energy terms
+    fwrite(&time,sizeof(double),1,efile);
+    fwrite(&(eners.epot),sizeof(double),1,efile);
+    fwrite(&(eners.ekin),sizeof(double),1,efile);
+    fwrite(&(eners.etot),sizeof(double),1,efile);
+    
   }while(steps < dat->nsteps);
   
   // END TODO
@@ -348,7 +374,9 @@ void run_md(DATA *dat, ATOM at[])
   terminate_omm(omm);
   
   crdfile=fopen(io.crdtitle_last,"wt");
-  //write lqst coordinates
+  //write last coordinates
   write_xyz(at,dat,steps,crdfile);
+  
   fclose(crdfile);
+  fclose(efile);
 }

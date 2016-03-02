@@ -3,3 +3,4 @@
 /example
 *.kdev4
 /build
+.Rproj.user

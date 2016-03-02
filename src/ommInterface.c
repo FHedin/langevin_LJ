@@ -52,6 +52,13 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   nonbond     = OpenMM_NonbondedForce_create();
   OpenMM_NonbondedForce_setNonbondedMethod(nonbond,OpenMM_NonbondedForce_CutoffNonPeriodic);
   
+  OpenMM_Boolean testPBC = OpenMM_NonbondedForce_usesPeriodicBoundaryConditions(nonbond);
+  if(testPBC == OpenMM_True)
+  {
+    LOG_PRINT(LOG_ERROR,"Error : nonbonded force claims to use PBC but this should be impossible !\n");
+    exit(-1);
+  }
+  
   if(isfinite(dat->cuton) && isfinite(dat->cutoff) && (dat->cuton < dat->cutoff))
   {
     LOG_PRINT(LOG_INFO," User specified cuton = %lf and cutoff = %lf for openMM.\n",dat->cuton,dat->cutoff);
@@ -81,11 +88,9 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
     );
     
     // open mm expects nanometers for the unit of distance, so we need to convert from Angstroems to nm 
-    OpenMM_Vec3 posInAng,posInNm;
-    posInAng.x = atoms[n].x;
-    posInAng.y = atoms[n].y;
-    posInAng.z = atoms[n].z;
-    posInNm = OpenMM_Vec3_scale(posInAng,OpenMM_NmPerAngstrom);
+    OpenMM_Vec3* posInAng = (OpenMM_Vec3*) &(atoms[n].xyz);
+    OpenMM_Vec3 posInNm;
+    posInNm = OpenMM_Vec3_scale(*posInAng,OpenMM_NmPerAngstrom);
     
     // add coordinates to openmm vector structure
     OpenMM_Vec3Array_append(initialPosInNm, posInNm);
@@ -164,7 +169,7 @@ void doNsteps_omm(MyOpenMMData* omm, int numSteps)
  *                    COPY STATE BACK TO CPU FROM OPENMM
  * -------------------------------------------------------------------------- */
 void getState_omm(MyOpenMMData* omm, int wantEnergy, 
-                  double* timeInPs, double* energyInKJ,
+                  double* timeInPs, ENERGIES* energies, double* currentTemperature,
                   ATOM atoms[], DATA* dat)
 {
   OpenMM_State*           state;
@@ -187,20 +192,31 @@ void getState_omm(MyOpenMMData* omm, int wantEnergy,
   posArrayInNm = OpenMM_State_getPositions(state);
   for (uint32_t n=0; n < dat->natom; n++)
   {
-//     OpenMM_Vec3 posInAng = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
-//     atoms[n].x = posInAng.x;
-//     atoms[n].y = posInAng.y;
-//     atoms[n].z = posInAng.z;
-    atoms[n].xyz = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
+    OpenMM_Vec3* ptr = (OpenMM_Vec3*) &(atoms[n].xyz);
+    *ptr = OpenMM_Vec3_scale(*OpenMM_Vec3Array_get(posArrayInNm,n),OpenMM_AngstromsPerNm);
   }
 
-    /* If energy has been requested, obtain it and convert from kJ */
-    *energyInKJ = 0;
-    if (wantEnergy) 
-        *energyInKJ = (   OpenMM_State_getPotentialEnergy(state) 
-                          + OpenMM_State_getKineticEnergy(state));
-
-    OpenMM_State_destroy(state);
+  /* If energy has been requested, obtain it and convert from kJ */
+  if (wantEnergy)
+  {
+    energies->epot = OpenMM_State_getPotentialEnergy(state);
+    energies->ekin = OpenMM_State_getKineticEnergy(state);
+    energies->etot = energies->epot + energies->ekin;
+  }
+  
+  INTEGRATORS integType = (INTEGRATORS) dat->integrator;
+  switch(integType)
+  {
+    case LANGEVIN:
+      *currentTemperature = OpenMM_LangevinIntegrator_getTemperature((OpenMM_LangevinIntegrator*)omm->integrator);
+      break;
+      
+    case BROWNIAN:
+      *currentTemperature = OpenMM_BrownianIntegrator_getTemperature((OpenMM_BrownianIntegrator*)omm->integrator);
+      break;
+  }
+  
+  OpenMM_State_destroy(state);
   
 }
 
