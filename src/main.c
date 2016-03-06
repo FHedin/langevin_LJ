@@ -370,7 +370,7 @@ void run_md(DATA *dat, ATOM at[])
   }while(steps < dat->nsteps);
   
   // END TODO
-    
+
   terminate_omm(omm);
   
   crdfile=fopen(io.crdtitle_last,"wt");
