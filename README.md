@@ -7,19 +7,17 @@ C program for Langevin MD simulations applied to Lennard Jones clusters only.
 ----------------------------------------------
 ## COMPILE & INSTALL
 ----------------------------------------------
-A C compiler compatible with the C99 standard or newer is required.
+A C compiler compatible with the C11 standard is required.
 
 You will need to Download or Compile the OpenMM library, a required dependancy : 
-
 see https://simtk.org/home/openmm
-and https://github.com/pandegroup/openmm
+and/or https://github.com/pandegroup/openmm
 
 Be sure to have CMAKE installed (http://www.cmake.org/), available on most repositories.
 
-Tested compilers:
-	* gcc 4.6.3 and newer versions
-	* clang 3.4 and newer versions
-	* icc 15.0.1
+Tested compilers (ubuntu 15.10):
+	* gcc 4.8.5 - 4.9.3 - 5.2.1
+	* clang 3.4.2 - 3.6.2
 
 Create a build directory and move to that directory: 
   * mkdir build && cd build

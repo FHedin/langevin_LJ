@@ -6,7 +6,7 @@
 # integration method to use : LANGEVIN or BROWNIAN
 # friction coefficicent in ps^-1
 # timestep in ps
-METHOD BROWNIAN FRICTION 1.0 TIMESTEP 0.002
+METHOD LANGEVIN FRICTION 1.0 TIMESTEP 0.002
 
 # non-bonded parameters : no PBC for the moment, openMM cutoff-cuton implemented with switching method : in nm
 NONBOND NOPBC CUTON 1.2 CUTOFF 1.4

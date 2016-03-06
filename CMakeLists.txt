@@ -58,8 +58,8 @@ add_executable(${TGT} ${SRCS})
 
 if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
     # clang compiler : should perform well on all cpus
-#     set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g")
-#     set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
+#     set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g")
+#     set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
     # clang compiler : optimise for current machine
     set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g -march=native")
@@ -74,8 +74,8 @@ if ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
 
 elseif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
     # gnu compiler : should perform well on all cpus
-#     set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g")
-#     set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
+#     set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O3 -g")
+#     set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -msse2 -fno-strict-aliasing -O0 -g")
 
     # gnu compiler : optimise for current machine
     set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -pedantic -msse2 -fno-strict-aliasing -O3 -g -march=native")
@@ -90,8 +90,8 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
 	
 elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "Intel")
     # when using intel compiler : optimise for modern intel cpus
-#     set(CMAKE_C_FLAGS_RELEASE "-std=c99 -Wall -Wextra -msse2 -ax,CORE-AVX2,CORE-AVX-I,AVX,SSE4.2,SSE4.1,SSSE3,SSE3 -fno-strict-aliasing -O3 -g")
-#     set(CMAKE_C_FLAGS_DEBUG   "-std=c99 -Wall -Wextra -msse2 -ax,CORE-AVX2,CORE-AVX-I,AVX,SSE4.2,SSE4.1,SSSE3,SSE3 -fno-strict-aliasing -O0 -g")
+#     set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -msse2 -ax,CORE-AVX2,CORE-AVX-I,AVX,SSE4.2,SSE4.1,SSSE3,SSE3 -fno-strict-aliasing -O3 -g")
+#     set(CMAKE_C_FLAGS_DEBUG   "-std=c11 -Wall -Wextra -msse2 -ax,CORE-AVX2,CORE-AVX-I,AVX,SSE4.2,SSE4.1,SSSE3,SSE3 -fno-strict-aliasing -O0 -g")
 
     # when using intel compiler : optimise for current machine
     set(CMAKE_C_FLAGS_RELEASE "-std=c11 -Wall -Wextra -fno-strict-aliasing -O3 -g -xHost")

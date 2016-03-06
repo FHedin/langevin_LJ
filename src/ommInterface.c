@@ -232,7 +232,7 @@ void infos_omm(const MyOpenMMData* omm)
 
   const OpenMM_Platform* platform = OpenMM_Context_getPlatform(cont);
   
-  OpenMM_StringArray* platform_properties_names = OpenMM_Platform_getPropertyNames(platform);
+  const OpenMM_StringArray* platform_properties_names = OpenMM_Platform_getPropertyNames(platform);
   int arraySize = OpenMM_StringArray_getSize(platform_properties_names);
   
   LOG_PRINT(LOG_INFO,"Dump of propeties and their values for platform  %s :\n",omm->platformName);
