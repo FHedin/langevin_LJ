@@ -56,7 +56,7 @@ void read_xyz(ATOM at[], DATA *dat, FILE *inpf)
     uint32_t nat=0;
     char comm[1024]="";
 
-    fscanf(inpf,"%d\n",&nat);
+    fscanf(inpf,"%u\n",&nat);
     fgets(comm,1024,inpf);
 
     if (nat != dat->natom)

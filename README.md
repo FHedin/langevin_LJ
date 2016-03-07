@@ -15,9 +15,10 @@ and/or https://github.com/pandegroup/openmm
 
 Be sure to have CMAKE installed (http://www.cmake.org/), available on most repositories.
 
-Tested compilers (ubuntu 15.10):
-	* gcc 4.8.5 - 4.9.3 - 5.2.1
-	* clang 3.4.2 - 3.6.2
+Tested compilers (ubuntu 15.10 or Fedora 22):
+  * gcc 4.8.5 - 4.9.3 - 5.2.1
+  * clang 3.4.2 - 3.6.2
+  * icc 16.0.0
 
 Create a build directory and move to that directory: 
   * mkdir build && cd build

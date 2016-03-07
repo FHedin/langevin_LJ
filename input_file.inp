@@ -57,3 +57,8 @@ SAVE    COOR    LAST    XYZ     'run147ar_last.xyz'
 # regularly save the trajectory to a file (dcd is the only available type for the moment, anyway xyz takes far too much disk space and is slow to read)
 SAVE    COOR    TRAJ    DCD 'run147ar.dcd'  EACH    5000
 
+# save energy to a binary file : see files in ./utils for files for reading it
+#  save frequency should be the same that the one for trajectory
+SAVE    ENER    'run147ar_ene.bin'  EACH  5000
+
+

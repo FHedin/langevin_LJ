@@ -335,13 +335,11 @@ void run_md(DATA *dat, ATOM at[])
   
   // get initial energy
   getState_omm(omm,1,&time,&eners,&currentT,at,dat);
-  fprintf(stdout,"time (ps) \t %lf \t ekin (kj/mol) \t %lf \t epot (kj/mol) \t %lf \t etot (kj/mol) \t %lf \t Temperature (K) \t %lf\n",time,eners.ekin,eners.epot,eners.etot,currentT);
+  fprintf(stdout,"time (ps) \t %lf \t epot (kj/mol) \t %lf \t ekin (kj/mol) \t %lf \t etot (kj/mol) \t %lf\n",time,eners.epot,eners.ekin,eners.etot);
   
-  //write time and energy terms
+  //write time and the 3 energy terms
   fwrite(&time,sizeof(double),1,efile);
-  fwrite(&(eners.epot),sizeof(double),1,efile);
-  fwrite(&(eners.ekin),sizeof(double),1,efile);
-  fwrite(&(eners.etot),sizeof(double),1,efile);
+  fwrite(&(eners.ene[0]),sizeof(double),3,efile);
   
   uint64_t steps = 0;
   do
@@ -354,8 +352,7 @@ void run_md(DATA *dat, ATOM at[])
     
     //get time energy and coordinates
     getState_omm(omm,1,&time,&eners,&currentT,at,dat);
-    fprintf(stdout,"time (ps) \t %lf \t ekin (kj/mol) \t %lf \t epot (kj/mol) \t %lf \t etot (kj/mol) \t %lf \t Temperature (K) \t %lf\n",time,eners.ekin,eners.epot,eners.etot,currentT);
-    
+    fprintf(stdout,"time (ps) \t %lf \t epot (kj/mol) \t %lf \t ekin (kj/mol) \t %lf \t etot (kj/mol) \t %lf\n",time,eners.epot,eners.ekin,eners.etot);
     steps += io.trsave;
     
     //write trajectory
@@ -363,9 +360,7 @@ void run_md(DATA *dat, ATOM at[])
     
     //write time and energy terms
     fwrite(&time,sizeof(double),1,efile);
-    fwrite(&(eners.epot),sizeof(double),1,efile);
-    fwrite(&(eners.ekin),sizeof(double),1,efile);
-    fwrite(&(eners.etot),sizeof(double),1,efile);
+    fwrite(&(eners.ene[0]),sizeof(double),3,efile);
     
   }while(steps < dat->nsteps);
   
