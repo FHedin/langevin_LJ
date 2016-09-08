@@ -22,12 +22,12 @@ N <- readBin(fi,'integer',size=8)
 
 print( paste("Number of records in energy file",fname,"is :",N) )
 
-df = data.frame(time=double(),epot=double(),ekin=double(),etot=double())
+df <- data.frame(time=double(),epot=double(),ekin=double(),etot=double())
 
 for(i in 1:N)
 {
   # read 4 double precision
-  df[i,] = readBin(fi,'numeric',size=8,n=4)
+  df[i,] <- readBin(fi,'numeric',size=8,n=4)
 }
 
 png('epot.png',width=1200,height=800)

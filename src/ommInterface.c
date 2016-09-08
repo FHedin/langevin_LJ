@@ -19,6 +19,9 @@
 #include "logger.h"
 #include "ommInterface.h"
 
+const char* ommPlatformName[4] = { "Reference\0", "CPU\0", "CUDA\0", "OpenCL\0" };
+const char* integratorsName[2] = { "LANGEVIN\0", "BROWNIAN\0" };
+
 /*
  * modification of omm example file HelloSodiumChlorideInC.c
  */
@@ -124,22 +127,32 @@ MyOpenMMData* init_omm(ATOM atoms[], DATA* dat)
   
   omm->integrator = lintegrator;
   
-  int nplatforms = OpenMM_Platform_getNumPlatforms();
-  LOG_PRINT(LOG_INFO,"Number of OpenMM platforms detected : %d\n",nplatforms);
-  double best_speed=-1.0;
-  int best_platform=0;
-  for(int index=0;index<nplatforms;index++)
+  if(dat->platform == AUTO)
   {
-    platform = OpenMM_Platform_getPlatform(index);
-    double lspeed = OpenMM_Platform_getSpeed(platform);
-    LOG_PRINT(LOG_INFO," Platform[%d] is : %s | speed is %lf \n",index,OpenMM_Platform_getName(platform),lspeed);
-    best_platform = (lspeed > best_speed)?index:best_platform;
-    best_speed = (lspeed > best_speed)?lspeed:best_speed;
+    int nplatforms = OpenMM_Platform_getNumPlatforms();
+    LOG_PRINT(LOG_INFO,"Number of OpenMM platforms detected : %d\n",nplatforms);
+    double best_speed=-1.0;
+    int best_platform=0;
+    for(int index=0;index<nplatforms;index++)
+    {
+      platform = OpenMM_Platform_getPlatform(index);
+      double lspeed = OpenMM_Platform_getSpeed(platform);
+      LOG_PRINT(LOG_INFO," Platform[%d] is : %s | speed is %lf \n",index,OpenMM_Platform_getName(platform),lspeed);
+      best_platform = (lspeed > best_speed)?index:best_platform;
+      best_speed = (lspeed > best_speed)?lspeed:best_speed;
+    }
+    
+    LOG_PRINT(LOG_INFO,"Will use Platform[%d], which is apparently the fastest\n",best_platform);
+    
+    platform = OpenMM_Platform_getPlatform(best_platform);
+  }
+  else
+  {
+    LOG_PRINT(LOG_INFO,"Will use Platform '%s', which is apparently the fastest\n",ommPlatformName[dat->platform]);
+    platform = OpenMM_Platform_getPlatform(dat->platform);
   }
   
-  LOG_PRINT(LOG_INFO,"Will use Platform[%d], which is apparently the fastest\n",best_platform);
   
-  platform = OpenMM_Platform_getPlatform(best_platform);
   omm->context = OpenMM_Context_create_2(omm->system, omm->integrator, platform);
   
 //   omm->context = OpenMM_Context_create(omm->system, omm->integrator);

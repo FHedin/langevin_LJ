@@ -71,7 +71,11 @@ extern uint32_t is_stdout_redirected;
 typedef struct
 {
   uint32_t natom ;    ///< Number of atoms
-  char method[32];    ///< MC Method string : 'METROP' or 'SPAV' (case insensitive)
+  
+  uint8_t  platform;  ///< The OpenMM platform desired by the user ; by default fastest chosen by openMM itself
+  
+  uint8_t  method;    ///< MD integration method string : 'LANGEVIN' or 'BROWNIAN' (case insensitive)
+  
   uint64_t nsteps ;   ///< Number of steps as a 64 bits integer to allow really long simulations (i.e. more than 2 billions)
 
   double inid ;       ///< An initial distance term used when randomly assigning coordinates to atoms when generating a cluster

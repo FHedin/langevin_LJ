@@ -23,6 +23,7 @@
 #include "io.h"
 #include "tools.h"
 #include "logger.h"
+#include "ommInterface.h"
 
 ///the array of params size
 static uint32_t pars_size = 0 ;
@@ -68,13 +69,41 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
         {
             buff3=strtok(NULL," \n\t");
 
-            ///to know which MD method we use
-            if (!strcasecmp(buff2,"METHOD"))
+            /** if the user want to force the use of a given platform
+             *  default is to use the fastest available one
+            **/
+            if (!strcasecmp(buff2,"PLATFORM"))
+            {
+              /*
+               * Possible OpenMM platforms : 
+               *  REF  : on cpu, not optimised, not parallellised
+               *  CPU  : on cpu, optimised, parallellised with OpenMP
+               *  OCL  : on cpu or gpu or any accelerating device available
+               *  CUDA : on nvidia gpu only probably the fastest
+               */
+              if (!strcasecmp(buff3,"AUTO"))
+                dat->platform = AUTO;
+              else if (!strcasecmp(buff3,"REF"))
+                dat->platform = REF;
+              else if (!strcasecmp(buff3,"CPU"))
+                dat->platform = CPU;
+              else if (!strcasecmp(buff3,"CUDA"))
+                dat->platform = CUDA;
+              else if (!strcasecmp(buff3,"OCL"))
+                dat->platform = OCL;
+              else
+              {
+                LOG_PRINT(LOG_ERROR,"%s %s is unknown. Should be REF or CPU or CUDA or OCL.\n",buff2,buff3);
+                exit(-1);
+              }
+            }
+            /// to know which MD method we use
+            else if (!strcasecmp(buff2,"METHOD"))
             {
                 if (!strcasecmp(buff3,"LANGEVIN"))
-                  sprintf(dat->method,"%s",buff3);
+                  dat->method = BROWNIAN;
                 else if (!strcasecmp(buff3,"BROWNIAN"))
-                  sprintf(dat->method,"%s",buff3);
+                  dat->method = LANGEVIN;
                 else
                 {
                     LOG_PRINT(LOG_ERROR,"%s %s is unknown. Should be LANGEVIN or BROWNIAN.\n",buff2,buff3);
@@ -90,7 +119,7 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
                 dat->timestep = atof(tstep);
             }
             /// get the nonbonded parameters
-            if (!strcasecmp(buff2,"NONBOND"))
+            else if (!strcasecmp(buff2,"NONBOND"))
             {
               // error if something else than nopbc given 
               if (strcasecmp(buff3,"NOPBC"))

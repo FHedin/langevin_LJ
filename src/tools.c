@@ -93,7 +93,7 @@ void build_cluster(ATOM at[], DATA *dat, uint32_t from, uint32_t to, int32_t mod
     {
         double randvec[3] = {0.0} ;
 
-        dat->inid = sqrt(dat->natom) - sqrt(dat->natom)/2.0;
+        dat->inid = (dat->natom < 256) ? (sqrt(dat->natom)) : (sqrt(dat->natom) - sqrt(dat->natom)/4.0);
 
         for (i=from; i<to; i++)
         {

@@ -20,17 +20,30 @@
 #include "OpenMMCWrapper.h"
 
 typedef struct {
-    OpenMM_System*      system;
-    OpenMM_Context*     context;
-    OpenMM_Integrator*  integrator;
-    const char*         platformName;
+  OpenMM_System*      system;
+  OpenMM_Context*     context;
+  OpenMM_Integrator*  integrator;
+  const char*         platformName;
 } MyOpenMMData;
 
 typedef enum
 {
+  AUTO= -1, //< AUTO : let OpenMM find the fastest platform
+  REF = 0,  //< REF  : on cpu, not optimised, nor parallellised
+  CPU = 1,  //< CPU  : on cpu, optimised, parallellised with OpenMP
+  CUDA= 2,  //< OCL  : on cpu or gpu or any accelerating device available
+  OCL = 3   //< CUDA : on nvidia gpu only probably the fastest
+} PLATFORMS;
+
+extern const char* ommPlatformName[4];
+
+typedef enum
+{
   LANGEVIN = 0,     //< code will use a Langevin integrator from OpenMM
-  BROWNIAN = 1      //< code will use a Brownian integrator from OpenMM
+  BROWNIAN = 1      //< code will use a Brownian integrator (i.e. overdamped Langevin) from OpenMM
 } INTEGRATORS;
+
+extern const char* integratorsName[2];
 
 MyOpenMMData* init_omm(ATOM atoms[], DATA* dat);
 

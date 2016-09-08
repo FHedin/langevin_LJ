@@ -26,6 +26,7 @@
 #include "io.h"
 #include "parsing.h"
 #include "logger.h"
+#include "ommInterface.h"
 
 // -----------------------------------------------------------------------------------------
 
@@ -94,6 +95,7 @@ int main(int argc, char** argv)
     char inpf[FILENAME_MAX] = "";
 
     DATA dat ;
+
     ATOM *at = NULL;
 
     // default trajectory mode is binary dcd
@@ -221,14 +223,14 @@ int main(int argc, char** argv)
     fprintf(stdout,"Final   configuration saved in file %s\n\n",io.crdtitle_last);
 
     // again print parameters
-    fprintf(stdout,"method   = %s\n",dat.method);
-    fprintf(stdout,"natom    = %d\n",dat.natom);
-    fprintf(stdout,"nsteps   = %"PRIu64"\n",dat.nsteps);
-    fprintf(stdout,"T        = %lf \n",dat.T);
-    fprintf(stdout,"friction = %lf \n",dat.friction);
-    fprintf(stdout,"tstep    = %lf \n",dat.timestep);
-    fprintf(stdout,"nb cuton    = %lf \n",dat.cuton);
-    fprintf(stdout,"nb cutoff   = %lf \n\n",dat.cutoff);
+    fprintf(stdout,"integrator   = %s\n",integratorsName[dat.method]);
+    fprintf(stdout,"natom        = %d\n",dat.natom);
+    fprintf(stdout,"nsteps       = %"PRIu64"\n",dat.nsteps);
+    fprintf(stdout,"T            = %lf\n",dat.T);
+    fprintf(stdout,"friction     = %lf\n",dat.friction);
+    fprintf(stdout,"tstep        = %lf\n",dat.timestep);
+    fprintf(stdout,"nb cuton     = %lf\n",dat.cuton);
+    fprintf(stdout,"nb cutoff    = %lf\n\n",dat.cutoff);
     
     run_md(&dat,at);
 
@@ -287,19 +289,19 @@ void run_md(DATA *dat, ATOM at[])
   LOG_PRINT(LOG_INFO,"Forcing energy save frequency to be the same than trajectory save frequency.\n");
   io.esave = (io.esave == io.trsave) ? io.esave : io.trsave;
   
-  if(!strcasecmp(dat->method,"LANGEVIN"))
-  {
-    dat->integrator = LANGEVIN;
-  }
-  else if(!strcasecmp(dat->method,"BROWNIAN"))
-  {
-    dat->integrator = BROWNIAN;
-  }
+//   if(!strcasecmp(dat->method,"LANGEVIN"))
+//   {
+//     dat->integrator = LANGEVIN;
+//   }
+//   else if(!strcasecmp(dat->method,"BROWNIAN"))
+//   {
+//     dat->integrator = BROWNIAN;
+//   }
 
   // initialise openMM code : fastest platform (usually cuda) will be selected automatically
   MyOpenMMData* omm = init_omm(at,dat);
   
-  fprintf(stdout,"OpenMM automatically initialised with fastest platform : %s\n\n",omm->platformName);
+  fprintf(stdout,"OpenMM initialised with platform : %s\n\n",omm->platformName);
   
   // print to info log file more infos concerning platform selected
   infos_omm(omm);

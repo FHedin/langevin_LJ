@@ -8,7 +8,7 @@
 # timestep in ps
 METHOD LANGEVIN FRICTION 1.0 TIMESTEP 0.002
 
-# non-bonded parameters : no PBC for the moment, openMM cutoff-cuton implemented with switching method : in nm
+# non-bonded parameters : no PBC for the moment, openMM cutoff-cuton implemented with switching method : in nanometers (nm)
 NONBOND NOPBC CUTON 1.2 CUTOFF 1.4
 # example if no cutoff required ; may be faster for small systems
 #NONBOND NOPBC NOCUT
