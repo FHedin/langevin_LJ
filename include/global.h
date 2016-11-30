@@ -126,7 +126,7 @@ typedef struct
   /// trick for openMM : anonymous union for either accesing coordinates atomically or directly as a structure
   union
   {
-    struct {double x,y,z;};         ///< X,Y,Z coordinates in anonympus struct so accessible atomically
+    struct {double x,y,z;};         ///< X,Y,Z coordinates in anonymous struct so accessible atomically
     struct {double x,y,z;}xyz;      ///< X,Y,Z coordinates but wrapped as a named structure : for mapping it later to OpenMM Vec3 type
   };
   char sym[4] ;   ///< atomic symbol
@@ -135,7 +135,7 @@ typedef struct
 
 /**
  * @brief A structure holding energy terms at a curent step
- * Using anonympus struct and unions the energy can be accessed either by term of as an array
+ * Using anonymous struct and unions the energy can be accessed either by term of as an array
  */
 typedef struct
 {

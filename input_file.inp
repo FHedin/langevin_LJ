@@ -1,3 +1,5 @@
+#!/usr/bin/env langevin_LJ
+
 # Input file for the langevin_LJ software
 # All lines starting with # are ignored
 # This file is case insensitive. 
@@ -9,10 +11,10 @@
 #  CPU  : on cpu, optimised, parallellised with OpenMP
 #  OCL  : on cpu or gpu or any accelerating device available
 #  CUDA : on nvidia gpu only probably the fastest
-#PLATFORM  REF
-#PLATFORM  CPU
-#PLATFORM  OCL
-PLATFORM  CUDA
+# PLATFORM  REF
+PLATFORM  CPU
+# PLATFORM  OCL
+# PLATFORM  CUDA
 
 # integration method to use : LANGEVIN or BROWNIAN
 # friction coefficicent in ps^-1
@@ -34,7 +36,7 @@ NATOMS 75
 TEMP   35
 
 # number of steps : coded as an unsigned 64-bits integer so > 2 billions allowed
-NSTEPS 500000
+NSTEPS 50000
 
 # For each type of atom, set the mass and Lennard Jones parameters
 #  units: amu, kj/mol and nanometers
