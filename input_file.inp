@@ -3,10 +3,21 @@
 # This file is case insensitive. 
 # You can separate the couples "keyword value" by using blank spaces or tabulations.
 
+# OpenMM platform to use
+#  AUTO : let OpenMM find the fastest platform
+#  REF  : on cpu, not optimised, nor parallellised : extremely slow !
+#  CPU  : on cpu, optimised, parallellised with OpenMP
+#  OCL  : on cpu or gpu or any accelerating device available
+#  CUDA : on nvidia gpu only probably the fastest
+#PLATFORM  REF
+#PLATFORM  CPU
+#PLATFORM  OCL
+PLATFORM  CUDA
+
 # integration method to use : LANGEVIN or BROWNIAN
 # friction coefficicent in ps^-1
 # timestep in ps
-METHOD LANGEVIN FRICTION 1.0 TIMESTEP 0.002
+METHOD LANGEVIN FRICTION 1.0 TIMESTEP 0.001
 
 # non-bonded parameters : no PBC for the moment, openMM cutoff-cuton implemented with switching method : in nanometers (nm)
 NONBOND NOPBC CUTON 1.2 CUTOFF 1.4
@@ -14,7 +25,7 @@ NONBOND NOPBC CUTON 1.2 CUTOFF 1.4
 #NONBOND NOPBC NOCUT
 
 # the number of atoms
-NATOMS 147
+NATOMS 75
 
 # temperature in Kelvin
 #  for rare gases be sure to choose not too high, specially for lighter elements 
@@ -23,7 +34,7 @@ NATOMS 147
 TEMP   35
 
 # number of steps : coded as an unsigned 64-bits integer so > 2 billions allowed
-NSTEPS 25000000
+NSTEPS 500000
 
 # For each type of atom, set the mass and Lennard Jones parameters
 #  units: amu, kj/mol and nanometers
@@ -51,14 +62,14 @@ ATOM    1   TO  END     AR   COOR    RANDOM
 #ATOM    14  TO  END   AR   COOR    RANDOM
 
 # save initial and final coordinates to xyz files
-SAVE    COOR    FIRST   XYZ     'run147ar_init.xyz'
-SAVE    COOR    LAST    XYZ     'run147ar_last.xyz'
+SAVE    COOR    FIRST   XYZ     'run75ar_init.xyz'
+SAVE    COOR    LAST    XYZ     'run75ar_last.xyz'
 
 # regularly save the trajectory to a file (dcd is the only available type for the moment, anyway xyz takes far too much disk space and is slow to read)
-SAVE    COOR    TRAJ    DCD 'run147ar.dcd'  EACH    5000
+SAVE    COOR    TRAJ    DCD 'run75ar.dcd'  EACH    5000
 
 # save energy to a binary file : see files in ./utils for files for reading it
 #  save frequency should be the same that the one for trajectory
-SAVE    ENER    'run147ar_ene.bin'  EACH  5000
+SAVE    ENER    'run75ar_ene.bin'  EACH  5000
 
 
