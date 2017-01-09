@@ -5,7 +5,7 @@
 C program for Langevin MD simulations applied to Lennard Jones clusters only.
 
 ----------------------------------------------
-## COMPILE & INSTALL
+## DEPENDANCIES, COMPILE & INSTALL
 ----------------------------------------------
 A C compiler compatible with the C11 standard is required.
 
@@ -15,8 +15,8 @@ and/or https://github.com/pandegroup/openmm
 
 Be sure to have CMAKE installed (http://www.cmake.org/), available on most repositories.
 
-Tested compilers (ubuntu 15.10 or Fedora 22):
-  * gcc 4.8.5 - 4.9.3 - 5.2.1
+Tested compilers (ubuntu 15.10 and 16.04):
+  * gcc 4.8.5 - 4.9.3 - 5.2.1 -5.4.0
   * clang 3.4.2 - 3.6.2
   * icc 16.0.0
 
@@ -51,12 +51,13 @@ For generating the documentation, run doxygen in the current directory (http://w
 ----------------------------------------------
 ## LICENSING (all files excepted subdirectory dSFMT)
 ----------------------------------------------
-Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel.
+Copyright (c) 2016-2017, Florent Hédin, Tony Lelièvre, and École des Ponts - ParisTech
 All rights reserved.
 
 The 3-clause BSD license is applied to this software.
 
 See LICENSE.txt
+
 
 ----------------------------------------------
 ## NOTE CONCERNING dSFMT
@@ -71,7 +72,7 @@ University. All rights reserved.
 See dSFMT/LICENSE_dSFMT.txt
 
 ----------------------------------------------
-## OpenMM platform
+## NOTE CONCERNING OpenMM platform
 ----------------------------------------------
 
 The software should automatically detect the fastest OpenMM Platform available on your computer (i.e. CUDA, OpenCL, ...)

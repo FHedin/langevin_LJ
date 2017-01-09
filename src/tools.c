@@ -3,10 +3,10 @@
  *
  * \brief File containing tool functions called across the program
  *
- * \authors Florent Hédin (University of Basel, Switzerland) \n
- *          Markus Meuwly (University of Basel, Switzerland)
+ * \authors Florent Hédin (École des Ponts - ParisTech) \n
+ *          Tony Lelièvre (École des Ponts - ParisTech)
  *
- * \copyright Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel. \n
+ * \copyright Copyright (c) 2016-2017, Florent Hédin, Tony Lelièvre, and École des Ponts - ParisTech \n
  *            All rights reserved. \n
  *            The 3-clause BSD license is applied to this software. \n
  *            See LICENSE.txt

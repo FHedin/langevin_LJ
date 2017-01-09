@@ -1,7 +1,10 @@
-# Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel.
+# Copyright (c) 2016-2017, Florent Hédin, Tony Lelièvre, and École des Ponts - ParisTech
 #All rights reserved.
+#
 #The 3-clause BSD license is applied to this software.
+#
 #See LICENSE.txt
+
 
 cmake_minimum_required (VERSION 2.6)
 

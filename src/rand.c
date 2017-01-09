@@ -6,10 +6,10 @@
  *        If not by default the dSFMT generator is used (high quality, HIGHLY RECOMMENDED)
  *        Code for dSFMT is included in a subdirectory (unmodified, please avoid modifying excepted if you really know what you do as you may induce a severe bias)
  *
- * \authors Florent Hédin (University of Basel, Switzerland) \n
- *          Markus Meuwly (University of Basel, Switzerland)
+ * \authors Florent Hédin (École des Ponts - ParisTech) \n
+ *          Tony Lelièvre (École des Ponts - ParisTech)
  *
- * \copyright Copyright (c) 2011-2016, Florent Hédin, Markus Meuwly, and the University of Basel. \n
+ * \copyright Copyright (c) 2016-2017, Florent Hédin, Tony Lelièvre, and École des Ponts - ParisTech \n
  *            All rights reserved. \n
  *            The 3-clause BSD license is applied to this software. \n
  *            See LICENSE.txt
