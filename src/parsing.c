@@ -101,9 +101,9 @@ void parse_from_file(char fname[], DATA *dat, ATOM **at)
             else if (!strcasecmp(buff2,"METHOD"))
             {
                 if (!strcasecmp(buff3,"LANGEVIN"))
-                  dat->method = BROWNIAN;
-                else if (!strcasecmp(buff3,"BROWNIAN"))
                   dat->method = LANGEVIN;
+                else if (!strcasecmp(buff3,"BROWNIAN"))
+                  dat->method = BROWNIAN;
                 else
                 {
                     LOG_PRINT(LOG_ERROR,"%s %s is unknown. Should be LANGEVIN or BROWNIAN.\n",buff2,buff3);
